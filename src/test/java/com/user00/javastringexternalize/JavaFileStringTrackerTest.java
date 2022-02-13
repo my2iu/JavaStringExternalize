@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import com.user00.javastringexternalize.StringSubstitution.SubstitutionType;
+
 public class JavaFileStringTrackerTest
 {
    @Test
@@ -29,4 +31,14 @@ public class JavaFileStringTrackerTest
       Assertions.assertEquals("print(\"hi\")\n\"test\"", tracker.getSubstitutions().get(3).getSurroundingContext());
    }
    
+   @Test
+   void testGetTransformedFile()
+   {
+      JavaFileStringTracker tracker = new JavaFileStringTracker("if (\n\"hello\" while\nint n = \"go\"\nprint(\"hi\")\n\"test\"");
+      tracker.getSubstitutions().get(1).setReplacementKey("TEST1");
+      tracker.getSubstitutions().get(1).substitution = SubstitutionType.SUBSTITUTE;
+      tracker.getSubstitutions().get(3).setReplacementKey("TEST2");
+      tracker.getSubstitutions().get(3).substitution = SubstitutionType.SUBSTITUTE;
+      Assertions.assertEquals("if (\n\"hello\" while\nint n = TEST1\nprint(\"hi\")\nTEST2", tracker.getTransformedFile());
+   }
 }

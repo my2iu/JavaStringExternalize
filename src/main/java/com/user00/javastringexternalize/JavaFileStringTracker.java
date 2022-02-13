@@ -1,10 +1,15 @@
 package com.user00.javastringexternalize;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
+
+import com.user00.javastringexternalize.StringSubstitution.SubstitutionType;
 
 public class JavaFileStringTracker
 {
@@ -62,8 +67,43 @@ public class JavaFileStringTracker
             tokens.get(endIdx).getStopIndex() + 1);
    }
    
+   public void fillInKeySubstitutions(BiFunction<String, Integer, String> keyGenerator)
+   {
+      for (int n = 0; n < substitutions.size(); n++) 
+      {
+         StringSubstitution sub = substitutions.get(n); 
+         if (sub.substitution != SubstitutionType.SUBSTITUTE) continue;
+         if (!"".equals(sub.replacementKey)) continue;
+         sub.replacementKey = keyGenerator.apply(sub.token.getText(), n);
+      }
+   }
+   
    public List<StringSubstitution> getSubstitutions()
    {
       return substitutions;
+   }
+
+   public String getTransformedFile()
+   {
+      // Figure out all the substitutions that we need
+      Map<Integer, StringSubstitution> subsLookup = new HashMap<>();
+      for (StringSubstitution sub: substitutions)
+            subsLookup.put(sub.getIndex(), sub);
+      // Apply the substitutions
+      String toReturn = "";
+      for (int n = 0; n < tokens.size(); n++)
+      {
+         Token tok = tokens.get(n);
+         StringSubstitution sub = subsLookup.get(n);
+         if (sub == null || sub.substitution != SubstitutionType.SUBSTITUTE)
+         {
+            toReturn += tok.getText();
+         }
+         else
+         {
+            toReturn += sub.replacementKey;
+         }
+      }
+      return toReturn;
    }
 }

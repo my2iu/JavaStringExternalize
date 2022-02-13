@@ -1,12 +1,16 @@
 package com.user00.javastringexternalize;
 
+import java.awt.BorderLayout;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.function.BiFunction;
 import java.util.function.IntUnaryOperator;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
 import org.apache.commons.cli.CommandLine;
@@ -53,9 +57,10 @@ public class JavaStringExternalize
       
       JFrame frame = new JFrame();
       frame.setTitle("String Externalization");
+      frame.setLayout(new BorderLayout());
       
       StringTrackerPanel trackerPanel = new StringTrackerPanel(tracker);
-      trackerPanel.setKeyGenerator((str, strIdx) -> {
+      BiFunction<String, Integer, String> keyGenerator = (str, strIdx) -> {
          return str.substring(1, str.length() - 1).codePoints().map(new IntUnaryOperator() {
             boolean isStart = true;
             @Override public int applyAsInt(int ch)
@@ -68,8 +73,23 @@ public class JavaStringExternalize
                return Character.isJavaIdentifierPart(ch) ? ch : '_';
             }
          }).collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append).toString();
+      }; 
+      trackerPanel.setKeyGenerator(keyGenerator);
+      frame.add(trackerPanel, BorderLayout.CENTER);
+      
+      JPanel buttonPanel = new JPanel();
+      JButton applyButton = new JButton("Apply");
+      applyButton.addActionListener(e -> {
+         tracker.fillInKeySubstitutions(keyGenerator);
+         String result = tracker.getTransformedFile();
       });
-      frame.add(trackerPanel);
+      buttonPanel.add(applyButton);
+      JButton cancelButton = new JButton("Cancel");
+      cancelButton.addActionListener(e -> {
+         frame.dispose();
+      });
+      buttonPanel.add(cancelButton);
+      frame.add(buttonPanel, BorderLayout.PAGE_END);
       
       frame.pack();
       frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
