@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class JavaStringExternalizeTest
@@ -12,7 +11,7 @@ public class JavaStringExternalizeTest
    @Test
    void basicLexerTest()
    {
-      JavaLexer lexer = new JavaLexer(CharStreams.fromString("if (hello \n\t"));
+      JavaLexer lexer = new JavaLexer(CharStreams.fromString("if (hello \n\r\r\n\t"));
       Token tok;
       tok = lexer.nextToken();
       assertEquals(1, tok.getLine());
@@ -29,9 +28,20 @@ public class JavaStringExternalizeTest
       assertEquals("hello", tok.getText());
       tok = lexer.nextToken();
       assertEquals(JavaLexer.WS, tok.getType());
-      assertEquals(" \n\t", tok.getText());
+      assertEquals(" ", tok.getText());
+      tok = lexer.nextToken();
+      assertEquals(JavaLexer.CRLF, tok.getType());
+      assertEquals("\n", tok.getText());
+      tok = lexer.nextToken();
+      assertEquals(JavaLexer.CRLF, tok.getType());
+      assertEquals("\r", tok.getText());
+      tok = lexer.nextToken();
+      assertEquals(JavaLexer.CRLF, tok.getType());
+      assertEquals("\r\n", tok.getText());
+      tok = lexer.nextToken();
+      assertEquals(JavaLexer.WS, tok.getType());
+      assertEquals("\t", tok.getText());
       tok = lexer.nextToken();
       assertEquals(JavaLexer.EOF, tok.getType());
-
    }
 }

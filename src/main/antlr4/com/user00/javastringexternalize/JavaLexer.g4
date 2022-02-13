@@ -198,7 +198,8 @@ ELLIPSIS:           '...';
 
 // Whitespace and comments
 
-WS:                 [ \t\r\n\u000C]+ -> channel(HIDDEN);
+CRLF:               ('\r\n' | '\r' | '\n') -> channel(HIDDEN);
+WS:                 [ \t\u000C]+ -> channel(HIDDEN);
 COMMENT:            '/*' .*? '*/'    -> channel(HIDDEN);
 LINE_COMMENT:       '//' ~[\r\n]*    -> channel(HIDDEN);
 
