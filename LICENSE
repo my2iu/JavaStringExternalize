@@ -1,3 +1,13 @@
+The Java Lexer grammar (src/main/antlr4/com/user00/javastringexternalize/JavaLexer.g4) was taken from the ANTLR examples at
+
+https://github.com/antlr/grammars-v4/blob/master/java/java/JavaLexer.g4
+
+which is BSD licensed.
+
+
+
+Other code is also BSD licensed:
+
 BSD 3-Clause License
 
 Copyright (c) 2022, Ming Iu
