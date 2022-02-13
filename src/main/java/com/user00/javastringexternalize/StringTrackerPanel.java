@@ -78,8 +78,8 @@ public class StringTrackerPanel extends JPanel
                tracker.getSubstitutions().get(rowIndex).setReplacementKey((String)aValue);
             }
             super.setValueAt(aValue, rowIndex, columnIndex);
-            // Redraw the whole row if anything changes, not just a single cel
-            fireTableRowsUpdated(rowIndex, rowIndex);
+            // Redraw the whole table if anything changes, not just a single cel
+            fireTableRowsUpdated(0, getRowCount());
          }
          
          @Override public String getColumnName(int column)
@@ -141,5 +141,10 @@ public class StringTrackerPanel extends JPanel
       });
       JScrollPane contextScroller = new JScrollPane(contextText);
       add(contextScroller, BorderLayout.PAGE_END);
+   }
+   
+   void setKeyGenerator(BiFunction<String, Integer, String> keyGenerator)
+   {
+      defaultKeyGenerator = keyGenerator;
    }
 }

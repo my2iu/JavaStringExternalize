@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.function.IntUnaryOperator;
 
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
@@ -53,7 +54,23 @@ public class JavaStringExternalize
       JFrame frame = new JFrame();
       frame.setTitle("String Externalization");
       
-      frame.add(new StringTrackerPanel(tracker));
+      StringTrackerPanel trackerPanel = new StringTrackerPanel(tracker);
+      trackerPanel.setKeyGenerator((str, strIdx) -> {
+         return str.substring(1, str.length() - 1).codePoints().map(new IntUnaryOperator() {
+            boolean isStart = true;
+            @Override public int applyAsInt(int ch)
+            {
+               if (isStart)
+               {
+                  isStart = false;
+                  return Character.isJavaIdentifierStart(ch) ? ch : '_';
+               }
+               return Character.isJavaIdentifierPart(ch) ? ch : '_';
+            }
+         }).collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append).toString();
+      });
+      frame.add(trackerPanel);
+      
       frame.pack();
       frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
       frame.setLocationRelativeTo(null);
