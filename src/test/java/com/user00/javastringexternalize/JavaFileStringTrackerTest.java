@@ -41,4 +41,34 @@ public class JavaFileStringTrackerTest
       tracker.getSubstitutions().get(3).substitution = SubstitutionType.SUBSTITUTE;
       Assertions.assertEquals("if (\n\"hello\" while\nint n = TEST1\nprint(\"hi\")\nTEST2", tracker.getTransformedFile());
    }
+
+   @Test
+   void testGetTransformedFileWithNewImport()
+   {
+      JavaFileStringTracker tracker = new JavaFileStringTracker("\nimport com.example.Messages;\nif (\n\"hello\" while\nint n = \"go\"\nprint(\"hi\")\n\"test\"");
+      tracker.getSubstitutions().get(1).setReplacementKey("TEST1");
+      tracker.getSubstitutions().get(1).substitution = SubstitutionType.SUBSTITUTE;
+      tracker.addedImport = "com.example.NewMessages";
+      Assertions.assertEquals("\nimport com.example.NewMessages;\nimport com.example.Messages;\nif (\n\"hello\" while\nint n = TEST1\nprint(\"hi\")\n\"test\"", tracker.getTransformedFile());
+   }
+
+   @Test
+   void testGetTransformedFileWithExistingImport()
+   {
+      JavaFileStringTracker tracker = new JavaFileStringTracker("\nimport com.example.Messages;\nif (\n\"hello\" while\nint n = \"go\"\nprint(\"hi\")\n\"test\"");
+      tracker.getSubstitutions().get(1).setReplacementKey("TEST1");
+      tracker.getSubstitutions().get(1).substitution = SubstitutionType.SUBSTITUTE;
+      tracker.addedImport = "com.example.Messages";
+      Assertions.assertEquals("\nimport com.example.Messages;\nif (\n\"hello\" while\nint n = TEST1\nprint(\"hi\")\n\"test\"", tracker.getTransformedFile());
+   }
+
+   @Test
+   void testParseJavaFile()
+   {
+      JavaFileStringTracker tracker = new JavaFileStringTracker("package com.example.test;\nimport java.util.*;\nimport java.io.IOException;\nclass Hello {}");
+      Assertions.assertEquals(26, tracker.importChecker.importDeclStart);
+      Assertions.assertEquals(74, tracker.importChecker.typeDeclStart);
+      Assertions.assertIterableEquals(Arrays.asList("java.util.*", "java.io.IOException"), tracker.importChecker.imports);
+      
+   }
 }
