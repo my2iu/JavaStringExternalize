@@ -124,7 +124,7 @@ public class StringTrackerPanel extends JPanel
             super.setValue(value);
          }
       });
-      setLayout(new BorderLayout());
+      setLayout(new BorderLayout(JavaStringExternalize.GUI_GAP, JavaStringExternalize.GUI_GAP));
       JScrollPane scrollPane = new JScrollPane(table);
       add(scrollPane, BorderLayout.CENTER);
       

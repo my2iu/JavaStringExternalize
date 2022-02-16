@@ -1,6 +1,7 @@
 package com.user00.javastringexternalize;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -8,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.function.BiFunction;
 import java.util.function.IntUnaryOperator;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -28,6 +30,7 @@ public class JavaStringExternalize
       // Command-line options
       Options options = new Options();
       options.addOption("src", true, "Source file to scan for strings");
+      options.addOption("import", true, "Import to be added to source file");
       options.addOption("help", false, "Show command-line information");
       CommandLineParser argParser = new DefaultParser();
       try
@@ -37,11 +40,10 @@ public class JavaStringExternalize
             printCommandLineHelp(options);
          if (!line.hasOption("src"))
          {
-            System.err.println("No Java source file specified");
-            printCommandLineHelp(options);
+            throw new ParseException("No Java source file specified");
          }
          
-         showStringSubstituter(line.getOptionValue("src"));
+         showStringSubstituter(line.getOptionValue("src"), line.getOptionValue("import"));
       }
       catch (ParseException e)
       {
@@ -50,14 +52,17 @@ public class JavaStringExternalize
       }
    }
    
-   static void showStringSubstituter(String file) throws IOException
+   static final int GUI_GAP = 5;
+   
+   static void showStringSubstituter(String file, String addedImport) throws IOException
    {
       String fileContents = new String(Files.readAllBytes(Paths.get(file)), StandardCharsets.UTF_8);
       JavaFileStringTracker tracker = new JavaFileStringTracker(fileContents);
+      tracker.addedImport = addedImport;
       
       JFrame frame = new JFrame();
       frame.setTitle("String Externalization");
-      frame.setLayout(new BorderLayout());
+      frame.setLayout(new BorderLayout(GUI_GAP, GUI_GAP));
       
       StringTrackerPanel trackerPanel = new StringTrackerPanel(tracker);
       BiFunction<String, Integer, String> keyGenerator = (str, strIdx) -> {
@@ -78,10 +83,18 @@ public class JavaStringExternalize
       frame.add(trackerPanel, BorderLayout.CENTER);
       
       JPanel buttonPanel = new JPanel();
+      buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, GUI_GAP, 0));
       JButton applyButton = new JButton("Apply");
       applyButton.addActionListener(e -> {
          tracker.fillInKeySubstitutions(keyGenerator);
          String result = tracker.getTransformedFile();
+         try {
+            Files.writeString(Paths.get(file), result, StandardCharsets.UTF_8);
+         }
+         catch (IOException ex)
+         {
+            ex.printStackTrace();
+         }
       });
       buttonPanel.add(applyButton);
       JButton cancelButton = new JButton("Cancel");
@@ -91,6 +104,7 @@ public class JavaStringExternalize
       buttonPanel.add(cancelButton);
       frame.add(buttonPanel, BorderLayout.PAGE_END);
       
+      frame.getRootPane().setBorder(BorderFactory.createEmptyBorder(GUI_GAP, GUI_GAP, GUI_GAP, GUI_GAP));
       frame.pack();
       frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
       frame.setLocationRelativeTo(null);

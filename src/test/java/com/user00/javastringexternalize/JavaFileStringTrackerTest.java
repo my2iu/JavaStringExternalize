@@ -39,17 +39,18 @@ public class JavaFileStringTrackerTest
       tracker.getSubstitutions().get(1).substitution = SubstitutionType.SUBSTITUTE;
       tracker.getSubstitutions().get(3).setReplacementKey("TEST2");
       tracker.getSubstitutions().get(3).substitution = SubstitutionType.SUBSTITUTE;
-      Assertions.assertEquals("if (\n\"hello\" while\nint n = TEST1\nprint(\"hi\")\nTEST2", tracker.getTransformedFile());
+      Assertions.assertEquals("if (\n\"hello\" while\nint n = Messages.TEST1\nprint(\"hi\")\nMessages.TEST2", tracker.getTransformedFile());
    }
 
    @Test
    void testGetTransformedFileWithNewImport()
    {
       JavaFileStringTracker tracker = new JavaFileStringTracker("\nimport com.example.Messages;\nif (\n\"hello\" while\nint n = \"go\"\nprint(\"hi\")\n\"test\"");
+      tracker.keyToSubstitute = (key) -> "NewMessages." + key;
       tracker.getSubstitutions().get(1).setReplacementKey("TEST1");
       tracker.getSubstitutions().get(1).substitution = SubstitutionType.SUBSTITUTE;
       tracker.addedImport = "com.example.NewMessages";
-      Assertions.assertEquals("\nimport com.example.NewMessages;\nimport com.example.Messages;\nif (\n\"hello\" while\nint n = TEST1\nprint(\"hi\")\n\"test\"", tracker.getTransformedFile());
+      Assertions.assertEquals("\nimport com.example.NewMessages;\nimport com.example.Messages;\nif (\n\"hello\" while\nint n = NewMessages.TEST1\nprint(\"hi\")\n\"test\"", tracker.getTransformedFile());
    }
 
    @Test
@@ -59,7 +60,7 @@ public class JavaFileStringTrackerTest
       tracker.getSubstitutions().get(1).setReplacementKey("TEST1");
       tracker.getSubstitutions().get(1).substitution = SubstitutionType.SUBSTITUTE;
       tracker.addedImport = "com.example.Messages";
-      Assertions.assertEquals("\nimport com.example.Messages;\nif (\n\"hello\" while\nint n = TEST1\nprint(\"hi\")\n\"test\"", tracker.getTransformedFile());
+      Assertions.assertEquals("\nimport com.example.Messages;\nif (\n\"hello\" while\nint n = Messages.TEST1\nprint(\"hi\")\n\"test\"", tracker.getTransformedFile());
    }
 
    @Test

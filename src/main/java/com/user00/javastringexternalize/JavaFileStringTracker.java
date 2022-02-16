@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -25,6 +26,7 @@ public class JavaFileStringTracker
    ImportChecker importChecker;
    
    String addedImport;
+   Function<String, String> keyToSubstitute = (key) -> "Messages." + key;
    
    public JavaFileStringTracker(String fileContents)
    {
@@ -145,7 +147,7 @@ public class JavaFileStringTracker
          }
          else
          {
-            toReturn += sub.replacementKey;
+            toReturn += keyToSubstitute.apply(sub.replacementKey);
          }
       }
       return toReturn;
