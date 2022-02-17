@@ -31,6 +31,8 @@ public class JavaStringExternalize
       Options options = new Options();
       options.addOption("src", true, "Source file to scan for strings");
       options.addOption("import", true, "Import to be added to source file");
+      options.addOption("propertiesFile", true, "Properties file where translations are added");
+      options.addOption("messageFile", true, "Java file where ");
       options.addOption("help", false, "Show command-line information");
       CommandLineParser argParser = new DefaultParser();
       try
@@ -43,7 +45,8 @@ public class JavaStringExternalize
             throw new ParseException("No Java source file specified");
          }
          
-         showStringSubstituter(line.getOptionValue("src"), line.getOptionValue("import"));
+         showStringSubstituter(line.getOptionValue("src"), line.getOptionValue("import"),
+               line.getOptionValue("propertiesFile"), line.getOptionValue("messageFile"));
       }
       catch (ParseException e)
       {
@@ -54,7 +57,8 @@ public class JavaStringExternalize
    
    static final int GUI_GAP = 5;
    
-   static void showStringSubstituter(String file, String addedImport) throws IOException
+   static void showStringSubstituter(String file, String addedImport,
+         String propertiesFile, String javaMessageFile) throws IOException
    {
       String fileContents = new String(Files.readAllBytes(Paths.get(file)), StandardCharsets.UTF_8);
       JavaFileStringTracker tracker = new JavaFileStringTracker(fileContents);
@@ -81,6 +85,9 @@ public class JavaStringExternalize
       }; 
       trackerPanel.setKeyGenerator(keyGenerator);
       frame.add(trackerPanel, BorderLayout.CENTER);
+      
+      ConfigurationFilesChooserPanel topPanel = new ConfigurationFilesChooserPanel(file, propertiesFile, javaMessageFile);
+      frame.add(topPanel, BorderLayout.PAGE_START);
       
       JPanel buttonPanel = new JPanel();
       buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, GUI_GAP, 0));
