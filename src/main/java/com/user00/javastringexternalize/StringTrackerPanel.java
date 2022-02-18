@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -23,10 +22,68 @@ public class StringTrackerPanel extends JPanel
    final int KEY_COLUMN = 2;
 
    BiFunction<String, Integer, String> defaultKeyGenerator = (str, idx) -> "value" + idx;
+
+   JTable table;
+   AbstractTableModel model;
+   JavaFileStringTracker tracker;
    
-   public StringTrackerPanel(JavaFileStringTracker tracker)
+   public StringTrackerPanel(JavaFileStringTracker stringTracker)
    {
-      AbstractTableModel model = new AbstractTableModel() {
+      tracker = stringTracker; 
+      model = modelForTracker(tracker);
+      table = new JTable(model);
+      table.getColumnModel().getColumn(EXTERNALIZE_COLUMN).setPreferredWidth(20);
+      table.getColumnModel().getColumn(KEY_COLUMN).setCellRenderer(new DefaultTableCellRenderer() {
+         Font italicFont = getFont().deriveFont(Font.ITALIC);
+         @Override
+         public Component getTableCellRendererComponent(JTable table,
+               Object value, boolean isSelected, boolean hasFocus, int row,
+               int column)
+         {
+            Component toReturn = super.getTableCellRendererComponent(table, value, isSelected, hasFocus,
+                  row, column);
+            StringSubstitution sub = tracker.getSubstitutions().get(row); 
+            if (sub.substitution == SubstitutionType.SUBSTITUTE
+                  && "".equals(sub.getReplacementKey()))
+            {
+               setText(defaultKeyGenerator.apply(sub.token.getText(), row));
+               setForeground(Color.GRAY);
+               setFont(italicFont);
+            }
+            else
+            {
+               setForeground(Color.BLACK);
+               setFont(getFont());
+            }
+            return toReturn;
+         }
+         @Override protected void setValue(Object value)
+         {
+            super.setValue(value);
+         }
+      });
+      setLayout(new BorderLayout(JavaStringExternalize.GUI_GAP, JavaStringExternalize.GUI_GAP));
+      JScrollPane scrollPane = new JScrollPane(table);
+      add(scrollPane, BorderLayout.CENTER);
+      
+      JTextArea contextText = new JTextArea("\n\n\n\n\n");
+      contextText.setEditable(false);
+      table.getSelectionModel().addListSelectionListener(e -> {
+         int row = table.getSelectedRow();
+         String context;
+         if (row < 0)
+            context = "";
+         else
+            context = tracker.getSubstitutions().get(row).getSurroundingContext();
+         contextText.setText(context);
+      });
+      JScrollPane contextScroller = new JScrollPane(contextText);
+      add(contextScroller, BorderLayout.PAGE_END);
+   }
+
+   private AbstractTableModel modelForTracker(JavaFileStringTracker tracker)
+   {
+      return new AbstractTableModel() {
          @Override public int getRowCount() { return tracker.getSubstitutions().size(); }
 
          @Override public int getColumnCount() { return 3; }
@@ -93,54 +150,12 @@ public class StringTrackerPanel extends JPanel
             }
          }
       };
-      JTable table = new JTable(model);
-      table.getColumnModel().getColumn(EXTERNALIZE_COLUMN).setPreferredWidth(20);
-      table.getColumnModel().getColumn(KEY_COLUMN).setCellRenderer(new DefaultTableCellRenderer() {
-         Font italicFont = getFont().deriveFont(Font.ITALIC);
-         @Override
-         public Component getTableCellRendererComponent(JTable table,
-               Object value, boolean isSelected, boolean hasFocus, int row,
-               int column)
-         {
-            Component toReturn = super.getTableCellRendererComponent(table, value, isSelected, hasFocus,
-                  row, column);
-            StringSubstitution sub = tracker.getSubstitutions().get(row); 
-            if (sub.substitution == SubstitutionType.SUBSTITUTE
-                  && "".equals(sub.getReplacementKey()))
-            {
-               setText(defaultKeyGenerator.apply(sub.token.getText(), row));
-               setForeground(Color.GRAY);
-               setFont(italicFont);
-            }
-            else
-            {
-               setForeground(Color.BLACK);
-               setFont(getFont());
-            }
-            return toReturn;
-         }
-         @Override protected void setValue(Object value)
-         {
-            super.setValue(value);
-         }
-      });
-      setLayout(new BorderLayout(JavaStringExternalize.GUI_GAP, JavaStringExternalize.GUI_GAP));
-      JScrollPane scrollPane = new JScrollPane(table);
-      add(scrollPane, BorderLayout.CENTER);
-      
-      JTextArea contextText = new JTextArea("\n\n\n\n\n");
-      contextText.setEditable(false);
-      table.getSelectionModel().addListSelectionListener(e -> {
-         int row = table.getSelectedRow();
-         String context;
-         if (row < 0)
-            context = "";
-         else
-            context = tracker.getSubstitutions().get(row).getSurroundingContext();
-         contextText.setText(context);
-      });
-      JScrollPane contextScroller = new JScrollPane(contextText);
-      add(contextScroller, BorderLayout.PAGE_END);
+   }
+   
+   void setTracker(JavaFileStringTracker newTracker)
+   {
+      tracker = newTracker;
+      table.setModel(modelForTracker(tracker));
    }
    
    void setKeyGenerator(BiFunction<String, Integer, String> keyGenerator)

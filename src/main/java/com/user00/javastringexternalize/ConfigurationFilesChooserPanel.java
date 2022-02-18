@@ -2,8 +2,6 @@ package com.user00.javastringexternalize;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
 import java.io.IOException;
 import java.util.function.Consumer;
 
@@ -14,12 +12,15 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 public class ConfigurationFilesChooserPanel extends JPanel
 {
    String sourceFile;
    String propertiesFile;
    String javaMessageFile;
+   Runnable onSourceChange;
    
    ConfigurationFilesChooserPanel(String sourceFile, String propertiesFile, String javaMessageFile)
    {
@@ -34,7 +35,11 @@ public class ConfigurationFilesChooserPanel extends JPanel
       add(Box.createRigidArea(new Dimension(0, JavaStringExternalize.GUI_GAP)));
       add(createFileLine("Java Message File", javaMessageFile, newFile -> this.javaMessageFile = newFile));
       add(Box.createRigidArea(new Dimension(0, JavaStringExternalize.GUI_GAP)));
-      add(createFileLine("Source", sourceFile, newFile -> this.sourceFile = newFile));
+      add(createFileLine("Source", sourceFile, newFile -> {
+         this.sourceFile = newFile;
+         if (onSourceChange != null)
+            onSourceChange.run();
+      }));
    }
    
    JPanel createFileLine(String label, String value, Consumer<String> onChange)
@@ -43,7 +48,12 @@ public class ConfigurationFilesChooserPanel extends JPanel
       line.setLayout(new BorderLayout(JavaStringExternalize.GUI_GAP, 0));
       line.add(new JLabel(label + ": "), BorderLayout.LINE_START);
       JTextField fileTextField = new JTextField(value);
-      fileTextField.addActionListener(e -> onChange.accept(fileTextField.getText()));
+      fileTextField.getDocument().addDocumentListener(new DocumentListener() {
+         @Override public void removeUpdate(DocumentEvent e) { onChange.accept(fileTextField.getText()); }
+         @Override public void insertUpdate(DocumentEvent e) { onChange.accept(fileTextField.getText()); }
+         @Override public void changedUpdate(DocumentEvent e) { onChange.accept(fileTextField.getText()); }
+      });
+//      fileTextField.addActionListener(e -> onChange.accept(fileTextField.getText()));
       line.add(fileTextField, BorderLayout.CENTER);
       JButton fileButton = new JButton("\uD83D\uDCC1"); 
       line.add(fileButton, BorderLayout.LINE_END);
