@@ -22,6 +22,7 @@ public class JavaStringExternalizeFrame extends JFrame
    {
       String fileContents = new String(Files.readAllBytes(Paths.get(file)), StandardCharsets.UTF_8);
       JavaFileStringTracker tracker = new JavaFileStringTracker(fileContents);
+      tracker.keyToSubstitute = (key) -> "Messages.m." + key;
       tracker.addedImport = addedImport;
       return tracker;
    }
@@ -67,7 +68,8 @@ public class JavaStringExternalizeFrame extends JFrame
       topPanel.onSourceChange = () -> {
          String f = topPanel.sourceFile;
          try {
-            trackerPanel.setTracker(trackerForPath(f, addedImport));
+            tracker = trackerForPath(f, addedImport);
+            trackerPanel.setTracker(tracker);
          } 
          catch (IOException e)
          {
@@ -84,6 +86,19 @@ public class JavaStringExternalizeFrame extends JFrame
          String result = tracker.getTransformedFile();
          try {
             Files.writeString(Paths.get(topPanel.sourceFile), result, StandardCharsets.UTF_8);
+            
+            if (topPanel.propertiesFile != null && !topPanel.propertiesFile.isEmpty())
+            {
+               String props = Files.readString(Paths.get(topPanel.propertiesFile), StandardCharsets.UTF_8);
+               Files.writeString(Paths.get(topPanel.propertiesFile), tracker.transformPropertiesFile(props), StandardCharsets.UTF_8);
+            }
+            
+            if (topPanel.javaMessageFile != null && !topPanel.javaMessageFile.isEmpty())
+            {
+               String msgClass = Files.readString(Paths.get(topPanel.javaMessageFile), StandardCharsets.UTF_8);
+               Files.writeString(Paths.get(topPanel.javaMessageFile), tracker.transformJavaMessageFile(msgClass), StandardCharsets.UTF_8);
+            }
+
             trackerPanel.setTracker(new JavaFileStringTracker(""));
          }
          catch (IOException ex)

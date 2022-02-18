@@ -64,12 +64,47 @@ public class JavaFileStringTrackerTest
    }
 
    @Test
+   void testTransformPropertiesFile()
+   {
+      JavaFileStringTracker tracker = new JavaFileStringTracker("if (\n\"hello\" while\nint n = \"go\"\nprint(\"hi\")\n\"test\"\n\"test\"");
+      tracker.getSubstitutions().get(1).setReplacementKey("TEST1");
+      tracker.getSubstitutions().get(1).substitution = SubstitutionType.SUBSTITUTE;
+      tracker.getSubstitutions().get(3).setReplacementKey("TEST2");
+      tracker.getSubstitutions().get(3).substitution = SubstitutionType.SUBSTITUTE;
+      tracker.getSubstitutions().get(4).setReplacementKey("TEST2");
+      tracker.getSubstitutions().get(4).substitution = SubstitutionType.SUBSTITUTE;
+      Assertions.assertEquals("BLAH=fj\n" + 
+            "TEST1 = go\n" + 
+            "TEST2 = test\n", tracker.transformPropertiesFile("BLAH=fj"));
+   }
+   
+   @Test
+   void testTransformJavaMessageFile()
+   {
+      JavaFileStringTracker tracker = new JavaFileStringTracker("if (\n\"hello\" while\nint n = \"go\"\nprint(\"hi\")\n\"test\"\n\"test\"");
+      tracker.getSubstitutions().get(1).setReplacementKey("TEST1");
+      tracker.getSubstitutions().get(1).substitution = SubstitutionType.SUBSTITUTE;
+      tracker.getSubstitutions().get(3).setReplacementKey("TEST2");
+      tracker.getSubstitutions().get(3).substitution = SubstitutionType.SUBSTITUTE;
+      tracker.getSubstitutions().get(4).setReplacementKey("TEST2");
+      tracker.getSubstitutions().get(4).substitution = SubstitutionType.SUBSTITUTE;
+      Assertions.assertEquals("random stuff, not proper file  public String TEST1;\n" + 
+            "  public String TEST2;\n", tracker.transformJavaMessageFile("random stuff, not proper file"));
+      Assertions.assertEquals("package com.example;\n" + 
+            "\n" + 
+            "class Woah {\n" + 
+            "  public String TEST1;\n" + 
+            "  public String TEST2;\n" + 
+            "}\n" + 
+            "//Stuff at end", tracker.transformJavaMessageFile("package com.example;\n\nclass Woah {\n}\n//Stuff at end"));
+   }
+   
+   @Test
    void testParseJavaFile()
    {
       JavaFileStringTracker tracker = new JavaFileStringTracker("package com.example.test;\nimport java.util.*;\nimport java.io.IOException;\nclass Hello {}");
       Assertions.assertEquals(26, tracker.importChecker.importDeclStart);
       Assertions.assertEquals(74, tracker.importChecker.typeDeclStart);
       Assertions.assertIterableEquals(Arrays.asList("java.util.*", "java.io.IOException"), tracker.importChecker.imports);
-      
    }
 }

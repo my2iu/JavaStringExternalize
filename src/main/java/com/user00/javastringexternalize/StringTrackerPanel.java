@@ -30,8 +30,30 @@ public class StringTrackerPanel extends JPanel
    public StringTrackerPanel(JavaFileStringTracker stringTracker)
    {
       tracker = stringTracker; 
-      model = modelForTracker(tracker);
+      model = modelForTracker();
       table = new JTable(model);
+      configureTableColumnModel();
+      setLayout(new BorderLayout(JavaStringExternalize.GUI_GAP, JavaStringExternalize.GUI_GAP));
+      JScrollPane scrollPane = new JScrollPane(table);
+      add(scrollPane, BorderLayout.CENTER);
+      
+      JTextArea contextText = new JTextArea("\n\n\n\n\n");
+      contextText.setEditable(false);
+      table.getSelectionModel().addListSelectionListener(e -> {
+         int row = table.getSelectedRow();
+         String context;
+         if (row < 0)
+            context = "";
+         else
+            context = tracker.getSubstitutions().get(row).getSurroundingContext();
+         contextText.setText(context);
+      });
+      JScrollPane contextScroller = new JScrollPane(contextText);
+      add(contextScroller, BorderLayout.PAGE_END);
+   }
+
+   private void configureTableColumnModel()
+   {
       table.getColumnModel().getColumn(EXTERNALIZE_COLUMN).setPreferredWidth(20);
       table.getColumnModel().getColumn(KEY_COLUMN).setCellRenderer(new DefaultTableCellRenderer() {
          Font italicFont = getFont().deriveFont(Font.ITALIC);
@@ -62,26 +84,9 @@ public class StringTrackerPanel extends JPanel
             super.setValue(value);
          }
       });
-      setLayout(new BorderLayout(JavaStringExternalize.GUI_GAP, JavaStringExternalize.GUI_GAP));
-      JScrollPane scrollPane = new JScrollPane(table);
-      add(scrollPane, BorderLayout.CENTER);
-      
-      JTextArea contextText = new JTextArea("\n\n\n\n\n");
-      contextText.setEditable(false);
-      table.getSelectionModel().addListSelectionListener(e -> {
-         int row = table.getSelectedRow();
-         String context;
-         if (row < 0)
-            context = "";
-         else
-            context = tracker.getSubstitutions().get(row).getSurroundingContext();
-         contextText.setText(context);
-      });
-      JScrollPane contextScroller = new JScrollPane(contextText);
-      add(contextScroller, BorderLayout.PAGE_END);
    }
-
-   private AbstractTableModel modelForTracker(JavaFileStringTracker tracker)
+   
+   private AbstractTableModel modelForTracker()
    {
       return new AbstractTableModel() {
          @Override public int getRowCount() { return tracker.getSubstitutions().size(); }
@@ -155,7 +160,8 @@ public class StringTrackerPanel extends JPanel
    void setTracker(JavaFileStringTracker newTracker)
    {
       tracker = newTracker;
-      table.setModel(modelForTracker(tracker));
+      table.setModel(modelForTracker());
+      configureTableColumnModel();
    }
    
    void setKeyGenerator(BiFunction<String, Integer, String> keyGenerator)

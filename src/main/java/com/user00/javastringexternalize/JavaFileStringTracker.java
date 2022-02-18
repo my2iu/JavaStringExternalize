@@ -1,10 +1,15 @@
 package com.user00.javastringexternalize;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.antlr.v4.runtime.CharStreams;
@@ -117,8 +122,7 @@ public class JavaFileStringTracker
       // Check if we have an import that needs to be added (i.e. we actually perform
       // a substitution and the import isn't already in the import list)
       String importToAdd = null;
-      if (!importChecker.imports.contains(addedImport)
-            && getSubstitutions().stream().anyMatch(sub -> sub.substitution == SubstitutionType.SUBSTITUTE))
+      if (!importChecker.imports.contains(addedImport) && hasSubstitutions())
          importToAdd = addedImport;
       
       // Figure out all the substitutions that we need
@@ -153,6 +157,73 @@ public class JavaFileStringTracker
       return toReturn;
    }
 
+   /**
+    * Are there any strings being externalized in the file
+    */
+   boolean hasSubstitutions()
+   {
+      return getSubstitutions().stream().anyMatch(sub -> sub.substitution == SubstitutionType.SUBSTITUTE);
+   }
+   
+   /**
+    * Adds new externalized strings to the end of a properties file
+    */
+   public String transformPropertiesFile(String contents)
+   {
+      // File doesn't need to change
+      if (!hasSubstitutions()) return contents;
+
+      // Just tack the new externalized strings to the end of the file
+      contents += "\n";
+
+      // Go through each substitution and store any unique ones
+      Set<String> keysSubstituted = new HashSet<String>();
+      for (StringSubstitution sub: substitutions)
+      {
+         if (sub.substitution != SubstitutionType.SUBSTITUTE) continue;
+         if (keysSubstituted.contains(sub.replacementKey)) continue;
+         keysSubstituted.add(sub.replacementKey);
+         String originalString = sub.token.getText();
+         originalString = originalString.substring(1, originalString.length() - 1);
+         contents += sub.replacementKey + " = " + originalString + "\n";
+      }
+      
+      return contents;
+   }
+   
+   /**
+    * Adds new externalized strings to a special Java Message file that is
+    * used to access the contents of the Properties file in a static way
+    */
+   public String transformJavaMessageFile(String contents)
+   {
+      // Find the last }, which is presumably the ending of the class, so we can
+      // insert new members there
+      JavaLexer lexer = new JavaLexer(CharStreams.fromString(contents));
+      List<Token> tokens = new ArrayList<>(lexer.getAllTokens());
+      Collections.reverse(tokens);
+      Optional<Token> lastBrace = tokens.stream().filter(tok -> tok.getType() == JavaLexer.RBRACE).findFirst();
+      int insertionPosition = contents.length();
+      if (lastBrace.isPresent())
+         insertionPosition = lastBrace.get().getStartIndex();
+
+      // Insert the new accessors to the externalized strings
+      String before = contents.substring(0, insertionPosition);
+      String after = contents.substring(insertionPosition);
+      String newKeys = "";
+      final String INDENT = "  ";
+      Set<String> keysSubstituted = new HashSet<String>();
+      for (StringSubstitution sub: substitutions)
+      {
+         if (sub.substitution != SubstitutionType.SUBSTITUTE) continue;
+         if (keysSubstituted.contains(sub.replacementKey)) continue;
+         keysSubstituted.add(sub.replacementKey);
+         newKeys += INDENT + "public String " + sub.replacementKey + ";\n";
+      }
+
+      return before + newKeys + after;
+   }
+   
    /**
     * Reads in all classes imported into Java source file and notes where
     * new imports should be added.
