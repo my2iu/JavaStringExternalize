@@ -20,13 +20,15 @@ public class ConfigurationFilesChooserPanel extends JPanel
    String sourceFile;
    String propertiesFile;
    String javaMessageFile;
+   String importedClass;
    Runnable onSourceChange;
    
-   ConfigurationFilesChooserPanel(String sourceFile, String propertiesFile, String javaMessageFile)
+   ConfigurationFilesChooserPanel(String sourceFile, String importedClass, String propertiesFile, String javaMessageFile)
    {
       this.sourceFile = sourceFile;
       this.propertiesFile = propertiesFile;
       this.javaMessageFile = javaMessageFile;
+      this.importedClass = importedClass;
       
       setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
       
@@ -35,11 +37,28 @@ public class ConfigurationFilesChooserPanel extends JPanel
       add(Box.createRigidArea(new Dimension(0, JavaStringExternalize.GUI_GAP)));
       add(createFileLine("Java Message File", javaMessageFile, newFile -> this.javaMessageFile = newFile));
       add(Box.createRigidArea(new Dimension(0, JavaStringExternalize.GUI_GAP)));
+      add(createTextFieldOnlyLine("Imported Class", importedClass, newClass -> this.importedClass = importedClass));
+      add(Box.createRigidArea(new Dimension(0, JavaStringExternalize.GUI_GAP)));
       add(createFileLine("Source", sourceFile, newFile -> {
          this.sourceFile = newFile;
          if (onSourceChange != null)
             onSourceChange.run();
       }));
+   }
+
+   JPanel createTextFieldOnlyLine(String label, String value, Consumer<String> onChange)
+   {
+      JPanel line = new JPanel();
+      line.setLayout(new BorderLayout(JavaStringExternalize.GUI_GAP, 0));
+      line.add(new JLabel(label + ": "), BorderLayout.LINE_START);
+      JTextField fileTextField = new JTextField(value);
+      fileTextField.getDocument().addDocumentListener(new DocumentListener() {
+         @Override public void removeUpdate(DocumentEvent e) { onChange.accept(fileTextField.getText()); }
+         @Override public void insertUpdate(DocumentEvent e) { onChange.accept(fileTextField.getText()); }
+         @Override public void changedUpdate(DocumentEvent e) { onChange.accept(fileTextField.getText()); }
+      });
+      line.add(fileTextField, BorderLayout.CENTER);
+      return line;
    }
    
    JPanel createFileLine(String label, String value, Consumer<String> onChange)

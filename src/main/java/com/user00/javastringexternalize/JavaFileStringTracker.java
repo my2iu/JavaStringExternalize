@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.antlr.v4.runtime.CharStreams;
@@ -30,7 +29,6 @@ public class JavaFileStringTracker
    List<StringSubstitution> substitutions;
    ImportChecker importChecker;
    
-   String addedImport;
    Function<String, String> keyToSubstitute = (key) -> "Messages." + key;
    
    public JavaFileStringTracker(String fileContents)
@@ -111,7 +109,7 @@ public class JavaFileStringTracker
       return substitutions;
    }
 
-   public String getTransformedFile()
+   public String getTransformedFile(String addedImport)
    {
       // Figure out where to add new import statements
       int addedImportPosition = -1;

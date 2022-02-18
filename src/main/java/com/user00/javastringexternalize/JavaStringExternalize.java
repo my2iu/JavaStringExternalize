@@ -13,6 +13,8 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 
 import org.apache.commons.cli.CommandLine;
@@ -25,8 +27,11 @@ import org.apache.commons.cli.ParseException;
 public class JavaStringExternalize
 {
 
-   public static void main(String[] args) throws IOException
+   public static void main(String[] args) throws IOException, ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException
    {
+      UIManager.setLookAndFeel(
+            UIManager.getSystemLookAndFeelClassName());
+
       // Command-line options
       Options options = new Options();
       options.addOption("src", true, "Source file to scan for strings");

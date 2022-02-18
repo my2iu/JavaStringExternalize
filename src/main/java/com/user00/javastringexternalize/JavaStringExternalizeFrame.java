@@ -18,12 +18,11 @@ import static com.user00.javastringexternalize.JavaStringExternalize.GUI_GAP;
 
 public class JavaStringExternalizeFrame extends JFrame
 {
-   private static JavaFileStringTracker trackerForPath(String file, String addedImport) throws IOException
+   private static JavaFileStringTracker trackerForPath(String file) throws IOException
    {
       String fileContents = new String(Files.readAllBytes(Paths.get(file)), StandardCharsets.UTF_8);
       JavaFileStringTracker tracker = new JavaFileStringTracker(fileContents);
       tracker.keyToSubstitute = (key) -> "Messages.m." + key;
-      tracker.addedImport = addedImport;
       return tracker;
    }
 
@@ -35,7 +34,7 @@ public class JavaStringExternalizeFrame extends JFrame
       String sourceFile = javaFile;
       try {
          if (sourceFile == null) sourceFile = "";
-         tracker = trackerForPath(sourceFile, addedImport);
+         tracker = trackerForPath(sourceFile);
       }
       catch (IOException e1)
       {
@@ -64,11 +63,11 @@ public class JavaStringExternalizeFrame extends JFrame
       trackerPanel.setKeyGenerator(keyGenerator);
       frame.add(trackerPanel, BorderLayout.CENTER);
       
-      ConfigurationFilesChooserPanel topPanel = new ConfigurationFilesChooserPanel(sourceFile, propertiesFile, javaMessageFile);
+      ConfigurationFilesChooserPanel topPanel = new ConfigurationFilesChooserPanel(sourceFile, addedImport, propertiesFile, javaMessageFile);
       topPanel.onSourceChange = () -> {
          String f = topPanel.sourceFile;
          try {
-            tracker = trackerForPath(f, addedImport);
+            tracker = trackerForPath(f);
             trackerPanel.setTracker(tracker);
          } 
          catch (IOException e)
@@ -83,7 +82,7 @@ public class JavaStringExternalizeFrame extends JFrame
       JButton applyButton = new JButton("Apply");
       applyButton.addActionListener(e -> {
          tracker.fillInKeySubstitutions(keyGenerator);
-         String result = tracker.getTransformedFile();
+         String result = tracker.getTransformedFile(topPanel.importedClass);
          try {
             Files.writeString(Paths.get(topPanel.sourceFile), result, StandardCharsets.UTF_8);
             
