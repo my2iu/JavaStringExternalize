@@ -11,7 +11,7 @@ public class StringSubstitution
    }
    int index;
    SubstitutionType substitution;
-   String surroundingContext;
+   String surroundingContext;  // Not used in the end
    String replacementKey = "";
    
    public StringSubstitution(Token token, int index, String surroundingContext)
@@ -25,6 +25,16 @@ public class StringSubstitution
    int getIndex()
    {
       return index;
+   }
+   
+   int getPositionInFile()
+   {
+      return token.getStartIndex();
+   }
+   
+   int getPositionEndInFile()
+   {
+      return token.getStopIndex();
    }
    
    String getSurroundingContext()

@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.Point;
+import java.awt.geom.Rectangle2D;
 import java.util.function.BiFunction;
 
 import javax.swing.JPanel;
@@ -12,6 +14,8 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultHighlighter;
 
 import com.user00.javastringexternalize.StringSubstitution.SubstitutionType;
 
@@ -26,6 +30,8 @@ public class StringTrackerPanel extends JPanel
    JTable table;
    AbstractTableModel model;
    JavaFileStringTracker tracker;
+   JTextArea contextTextArea;
+   JScrollPane contextScroller;
    
    public StringTrackerPanel(JavaFileStringTracker stringTracker)
    {
@@ -37,18 +43,35 @@ public class StringTrackerPanel extends JPanel
       JScrollPane scrollPane = new JScrollPane(table);
       add(scrollPane, BorderLayout.CENTER);
       
-      JTextArea contextText = new JTextArea("\n\n\n\n\n");
-      contextText.setEditable(false);
+      contextTextArea = new JTextArea("\n\n\n\n\n", 5, 20);
+      contextTextArea.setEditable(false);
+      contextTextArea.setText(tracker.fileContents);
       table.getSelectionModel().addListSelectionListener(e -> {
-         int row = table.getSelectedRow();
-         String context;
-         if (row < 0)
-            context = "";
-         else
-            context = tracker.getSubstitutions().get(row).getSurroundingContext();
-         contextText.setText(context);
+         try {
+            int row = table.getSelectedRow();
+            int pos = 0;
+            if (row >= 0)
+            {
+               StringSubstitution sub = tracker.getSubstitutions().get(row); 
+               pos = sub.getPositionInFile();
+               contextTextArea.getHighlighter().removeAllHighlights();
+               contextTextArea.getHighlighter().addHighlight(sub.getPositionInFile() + 1, sub.getPositionEndInFile(), new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW));
+//               contextTextArea.setCaretPosition(sub.getPositionInFile() + 1);
+//               contextTextArea.moveCaretPosition(sub.getPositionEndInFile());
+            }
+            Rectangle2D r = contextTextArea.modelToView2D(pos);
+            int scrollPosX = (int)r.getCenterX() - contextScroller.getViewport().getExtentSize().width / 2; 
+            int scrollPosY = (int)r.getCenterY() - contextScroller.getViewport().getExtentSize().height / 2;
+            if (scrollPosX < 0) scrollPosX = 0;
+            if (scrollPosY < 0) scrollPosY = 0;
+            contextScroller.getViewport().setViewPosition(new Point(scrollPosX, scrollPosY));
+         }
+         catch (BadLocationException e1)
+         {
+            e1.printStackTrace();
+         }
       });
-      JScrollPane contextScroller = new JScrollPane(contextText);
+      contextScroller = new JScrollPane(contextTextArea);
       add(contextScroller, BorderLayout.PAGE_END);
    }
 
@@ -160,6 +183,7 @@ public class StringTrackerPanel extends JPanel
    void setTracker(JavaFileStringTracker newTracker)
    {
       tracker = newTracker;
+      contextTextArea.setText(tracker.fileContents);
       table.setModel(modelForTracker());
       configureTableColumnModel();
    }
