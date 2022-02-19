@@ -37,7 +37,8 @@ public class JavaStringExternalize
       options.addOption("src", true, "Source file to scan for strings");
       options.addOption("import", true, "Import to be added to source file");
       options.addOption("propertiesFile", true, "Properties file where translations are added");
-      options.addOption("messageFile", true, "Java file where ");
+      options.addOption("messageFile", true, "Java file where accessors to translations are stored");
+      options.addOption("substitutionFormat", true, "String format of substitutions");
       options.addOption("help", false, "Show command-line information");
       CommandLineParser argParser = new DefaultParser();
       try
@@ -50,7 +51,8 @@ public class JavaStringExternalize
 //            throw new ParseException("No Java source file specified");
 //         }
          
-         JFrame frame = new JavaStringExternalizeFrame(line.getOptionValue("src"), line.getOptionValue("import"),
+         JFrame frame = new JavaStringExternalizeFrame(line.getOptionValue("src"), 
+               line.getOptionValue("substitutionFormat"), line.getOptionValue("import"),
                line.getOptionValue("propertiesFile"), line.getOptionValue("messageFile"));
          frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
          frame.setLocationRelativeTo(null);

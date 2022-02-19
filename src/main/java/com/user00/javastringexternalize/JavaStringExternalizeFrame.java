@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.MessageFormat;
 import java.util.function.BiFunction;
 import java.util.function.IntUnaryOperator;
 
@@ -22,15 +23,17 @@ public class JavaStringExternalizeFrame extends JFrame
    {
       String fileContents = new String(Files.readAllBytes(Paths.get(file)), StandardCharsets.UTF_8);
       JavaFileStringTracker tracker = new JavaFileStringTracker(fileContents);
-      tracker.keyToSubstitute = (key) -> "Messages.m." + key;
       return tracker;
    }
 
    JavaFileStringTracker tracker;
 
-   JavaStringExternalizeFrame(String javaFile, String addedImport,
+   JavaStringExternalizeFrame(String javaFile, 
+         String initialSubstitutionFormat, String addedImport,
          String propertiesFile, String javaMessageFile)
    {
+      if (initialSubstitutionFormat == null) 
+         initialSubstitutionFormat = "Messages.m.{0}";
       String sourceFile = javaFile;
       try {
          if (sourceFile == null) sourceFile = "";
@@ -63,7 +66,7 @@ public class JavaStringExternalizeFrame extends JFrame
       trackerPanel.setKeyGenerator(keyGenerator);
       frame.add(trackerPanel, BorderLayout.CENTER);
       
-      ConfigurationFilesChooserPanel topPanel = new ConfigurationFilesChooserPanel(sourceFile, addedImport, propertiesFile, javaMessageFile);
+      ConfigurationFilesChooserPanel topPanel = new ConfigurationFilesChooserPanel(sourceFile, initialSubstitutionFormat, addedImport, propertiesFile, javaMessageFile);
       topPanel.onSourceChange = () -> {
          String f = topPanel.sourceFile;
          try {
@@ -82,6 +85,8 @@ public class JavaStringExternalizeFrame extends JFrame
       JButton applyButton = new JButton("Apply");
       applyButton.addActionListener(e -> {
          tracker.fillInKeySubstitutions(keyGenerator);
+         MessageFormat substitutionFormat = new MessageFormat(topPanel.substitutionFormat);
+         tracker.keyToSubstitute = (key) -> substitutionFormat.format(new Object[] {key}).toString();
          String result = tracker.getTransformedFile(topPanel.importedClass);
          try {
             Files.writeString(Paths.get(topPanel.sourceFile), result, StandardCharsets.UTF_8);

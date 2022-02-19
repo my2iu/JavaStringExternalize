@@ -21,14 +21,16 @@ public class ConfigurationFilesChooserPanel extends JPanel
    String propertiesFile;
    String javaMessageFile;
    String importedClass;
+   String substitutionFormat;
    Runnable onSourceChange;
    
-   ConfigurationFilesChooserPanel(String sourceFile, String importedClass, String propertiesFile, String javaMessageFile)
+   ConfigurationFilesChooserPanel(String sourceFile, String substitutionFormat, String importedClass, String propertiesFile, String javaMessageFile)
    {
       this.sourceFile = sourceFile;
       this.propertiesFile = propertiesFile;
       this.javaMessageFile = javaMessageFile;
       this.importedClass = importedClass;
+      this.substitutionFormat = substitutionFormat;
       
       setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
       
@@ -37,7 +39,9 @@ public class ConfigurationFilesChooserPanel extends JPanel
       add(Box.createRigidArea(new Dimension(0, JavaStringExternalize.GUI_GAP)));
       add(createFileLine("Java Message File", javaMessageFile, newFile -> this.javaMessageFile = newFile));
       add(Box.createRigidArea(new Dimension(0, JavaStringExternalize.GUI_GAP)));
-      add(createTextFieldOnlyLine("Imported Class", importedClass, newClass -> this.importedClass = importedClass));
+      add(createTextFieldOnlyLine("Imported Class", importedClass, newClass -> this.importedClass = newClass));
+      add(Box.createRigidArea(new Dimension(0, JavaStringExternalize.GUI_GAP)));
+      add(createTextFieldOnlyLine("Substitution Format", substitutionFormat, newFormat -> this.substitutionFormat = newFormat));
       add(Box.createRigidArea(new Dimension(0, JavaStringExternalize.GUI_GAP)));
       add(createFileLine("Source", sourceFile, newFile -> {
          this.sourceFile = newFile;
