@@ -52,10 +52,14 @@ package com.example;
 
 public class Messages
 {
+  // Loads the translations from messages.properties
+  // and other messages_en.properties, 
+  // messages_fr.properties, etc. files
+  // that are stored in the com/example directory.
   public static Messages m =
     MessagesReader.loadMessages(
       new Messages(), 
-      "com.example.Messages");
+      "com.example.messages");
 
   // New externalized strings will be added here
   ...  
