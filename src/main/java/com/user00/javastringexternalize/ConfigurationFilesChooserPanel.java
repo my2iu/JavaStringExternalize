@@ -81,7 +81,7 @@ public class ConfigurationFilesChooserPanel extends JPanel
       JButton fileButton = new JButton("\uD83D\uDCC1"); 
       line.add(fileButton, BorderLayout.LINE_END);
       fileButton.addActionListener((evt) -> {
-         JFileChooser fc = new JFileChooser(value);
+         JFileChooser fc = new JFileChooser(fileTextField.getText());
          int result = fc.showOpenDialog(this);
          if (result == JFileChooser.APPROVE_OPTION)
          {
