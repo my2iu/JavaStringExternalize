@@ -1,12 +1,27 @@
 package com.user00.javastringexternalize;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 public class Converters {
    public static class Translation
@@ -79,6 +94,61 @@ public class Converters {
       return translations;
    }
 
+   /**
+    * Read xliff format used by Apple
+    */
+   public static List<Translation> readXliff12File(String xliffFile)
+   {
+      List<Translation> translations = new ArrayList<>();
+      
+      // Read the XML
+      Document doc = null;
+      try {
+         DocumentBuilderFactory dbf = DocumentBuilderFactory.newDefaultInstance();
+         DocumentBuilder db = dbf.newDocumentBuilder();
+         doc = db.parse(new InputSource(new StringReader(xliffFile)));
+         
+      } catch (ParserConfigurationException | SAXException | IOException e)
+      {
+         e.printStackTrace();
+      }
+      if (doc == null) return translations;
+      
+      // Convert things to translations
+      XPathFactory xpathFactory = XPathFactory.newInstance();
+      XPath xpath = xpathFactory.newXPath();
+      try
+      {
+         NodeList files = (NodeList)xpath.evaluate("/xliff/file", doc, XPathConstants.NODESET);
+         for (int fileIdx = 0; fileIdx < files.getLength(); fileIdx++)
+         {
+            // Check if it's a strings file or a UI file
+            Element fileEl = (Element)files.item(fileIdx);
+            boolean isStrings = false;
+            if (fileEl.hasAttribute("original") && fileEl.getAttribute("original").endsWith(".strings"))
+               isStrings = true;
+            
+            // Traverse the translations
+            NodeList transUnits = (NodeList)xpath.evaluate("body/trans-unit", fileEl, XPathConstants.NODESET);
+            for (int transIdx = 0; transIdx < transUnits.getLength(); transIdx++)
+            {
+               Element transEl = (Element)transUnits.item(transIdx);
+               String key = transEl.getAttribute("id");
+               String val = xpath.evaluate("source", transEl);
+               String note = xpath.evaluate("note", transEl);
+               // Comments from the UI are useless, so we will discard them
+               if (!isStrings) note = "";
+               if ("No comment provided by engineer.".equals(note)) note = "";
+               translations.add(new Translation(key, val, note));
+            }
+         }
+      } catch (XPathExpressionException e)
+      {
+         e.printStackTrace();
+      }
+      return translations;
+   }
+   
    public static String translationsToStringsXml(List<Translation> translations)
    {
       String toReturn = "";
