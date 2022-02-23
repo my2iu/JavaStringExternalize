@@ -98,3 +98,8 @@ public class MessagesReader
 ## Command-line options
 
 You may have to run the program multiple times to externalize the strings of multiple source files. Instead of needing to reconfigure the settings of the program each time, a lot of the configuration options can be set from the command-line. Just run the program with the "-help" command-line argument to get a list of command-line configuration options.
+
+
+## Translation file converters
+
+Different tools store their translations in different formats. Java stores translations in .properties files, Android stores translations in strings.xml files, and Apple's XCode stores translations in .xliff files. To make it easier to work with multi-platform applications, the program is able to convert .properties and .xliff files into Android's strings.xml format. These conversions are accessible from the Converters menu.
