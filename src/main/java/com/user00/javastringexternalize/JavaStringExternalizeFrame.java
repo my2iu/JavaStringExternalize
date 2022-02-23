@@ -13,6 +13,9 @@ import java.util.function.IntUnaryOperator;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 
 import static com.user00.javastringexternalize.JavaStringExternalize.GUI_GAP;
@@ -45,8 +48,29 @@ public class JavaStringExternalizeFrame extends JFrame
       }
       
       JFrame frame = this;
+      JPanel contentPane = new JPanel();
+      contentPane.setBorder(BorderFactory.createEmptyBorder(GUI_GAP, GUI_GAP, GUI_GAP, GUI_GAP));
+      frame.setContentPane(contentPane);
       frame.setTitle("String Externalization");
       frame.setLayout(new BorderLayout(GUI_GAP, GUI_GAP));
+      
+      JMenuBar menuBar = new JMenuBar();
+      frame.setJMenuBar(menuBar);
+      
+      JMenu fileMenu = new JMenu("File");
+      JMenuItem exitMenuItem = new JMenuItem("Exit");
+      exitMenuItem.addActionListener((e) -> {
+    	  frame.dispose();
+      });
+      fileMenu.add(exitMenuItem);
+      menuBar.add(fileMenu);
+      
+      JMenu convertersMenu = new JMenu("Converters");
+      JMenuItem propToStringsXmlMenuItem = new JMenuItem("Properties to Strings.xml...");
+      convertersMenu.add(propToStringsXmlMenuItem);
+      JMenuItem xliffToStringsXmlMenuItem = new JMenuItem("Xliff to Strings.xml...");
+      convertersMenu.add(xliffToStringsXmlMenuItem);
+      menuBar.add(convertersMenu);
       
       StringTrackerPanel trackerPanel = new StringTrackerPanel(tracker);
       BiFunction<String, Integer, String> keyGenerator = (str, strIdx) -> {
@@ -118,7 +142,6 @@ public class JavaStringExternalizeFrame extends JFrame
       buttonPanel.add(cancelButton);
       frame.add(buttonPanel, BorderLayout.PAGE_END);
       
-      frame.getRootPane().setBorder(BorderFactory.createEmptyBorder(GUI_GAP, GUI_GAP, GUI_GAP, GUI_GAP));
       frame.pack();
    }
 
