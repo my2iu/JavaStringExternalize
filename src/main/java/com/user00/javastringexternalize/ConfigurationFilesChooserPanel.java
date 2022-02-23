@@ -50,7 +50,7 @@ public class ConfigurationFilesChooserPanel extends JPanel
       }));
    }
 
-   JPanel createTextFieldOnlyLine(String label, String value, Consumer<String> onChange)
+   static JPanel createTextFieldOnlyLine(String label, String value, Consumer<String> onChange)
    {
       JPanel line = new JPanel();
       line.setLayout(new BorderLayout(JavaStringExternalize.GUI_GAP, 0));
@@ -64,13 +64,18 @@ public class ConfigurationFilesChooserPanel extends JPanel
       line.add(fileTextField, BorderLayout.CENTER);
       return line;
    }
-   
-   JPanel createFileLine(String label, String value, Consumer<String> onChange)
+
+   static JPanel createFileLine(String label, String value, Consumer<String> onChange)
+   {
+      return createFileLine(label, value, true, onChange);
+   }
+
+   static JPanel createFileLine(String label, String value, boolean isOpenFile, Consumer<String> onChange)
    {
       JPanel line = new JPanel();
       line.setLayout(new BorderLayout(JavaStringExternalize.GUI_GAP, 0));
       line.add(new JLabel(label + ": "), BorderLayout.LINE_START);
-      JTextField fileTextField = new JTextField(value);
+      JTextField fileTextField = new JTextField(value, 20);
       fileTextField.getDocument().addDocumentListener(new DocumentListener() {
          @Override public void removeUpdate(DocumentEvent e) { onChange.accept(fileTextField.getText()); }
          @Override public void insertUpdate(DocumentEvent e) { onChange.accept(fileTextField.getText()); }
@@ -82,7 +87,11 @@ public class ConfigurationFilesChooserPanel extends JPanel
       line.add(fileButton, BorderLayout.LINE_END);
       fileButton.addActionListener((evt) -> {
          JFileChooser fc = new JFileChooser(fileTextField.getText());
-         int result = fc.showOpenDialog(this);
+         int result;
+         if (isOpenFile)
+            result = fc.showOpenDialog(fileButton);
+         else
+            result = fc.showSaveDialog(fileButton);
          if (result == JFileChooser.APPROVE_OPTION)
          {
             try {

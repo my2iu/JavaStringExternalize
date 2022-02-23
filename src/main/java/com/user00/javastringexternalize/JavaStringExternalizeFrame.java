@@ -67,6 +67,16 @@ public class JavaStringExternalizeFrame extends JFrame
       
       JMenu convertersMenu = new JMenu("Converters");
       JMenuItem propToStringsXmlMenuItem = new JMenuItem("Properties to Strings.xml...");
+      propToStringsXmlMenuItem.addActionListener((e) -> {
+         ConvertersDialog dialog = new ConvertersDialog(frame, "Properties to Strings.xml", true);
+         dialog.setLocationRelativeTo(frame);
+         dialog.setVisible(true);
+         if (dialog.applyClicked)
+         {
+            
+            System.err.println("Apply clicked");
+         }
+      });
       convertersMenu.add(propToStringsXmlMenuItem);
       JMenuItem xliffToStringsXmlMenuItem = new JMenuItem("Xliff to Strings.xml...");
       convertersMenu.add(xliffToStringsXmlMenuItem);
