@@ -79,4 +79,19 @@ public class Converters {
       return translations;
    }
 
+   public static String translationsToStringsXml(List<Translation> translations)
+   {
+      String toReturn = "";
+      toReturn += "<resources>\n";
+      for (Translation trans: translations)
+      {
+         if (!trans.note.isEmpty())
+         {
+            toReturn += "<!--" + trans.note + "-->\n";
+         }
+         toReturn += String.format("  <string name=\"%s\">%s</string>\n", trans.key, trans.text);
+      }
+      toReturn += "</resources>\n";
+      return toReturn;
+   }
 }

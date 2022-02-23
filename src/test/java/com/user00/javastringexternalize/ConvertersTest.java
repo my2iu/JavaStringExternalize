@@ -1,5 +1,6 @@
 package com.user00.javastringexternalize;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
 import java.util.Arrays;
@@ -29,5 +30,25 @@ public class ConvertersTest
                   new Converters.Translation("keyOnly", "", "")
                   ),
             translations);
+   }
+   
+   @Test
+   public void testTranslationsToStringsXml()
+   {
+      String xml = Converters.translationsToStringsXml(Arrays.asList(
+                  new Converters.Translation("Hello", "This is hello", "Comment"),
+                  new Converters.Translation("go", "Go", ""),
+                  new Converters.Translation("OK", "okay", "Another comment\n two comments"),
+                  new Converters.Translation("keyOnly", "", "")
+                  ));
+      assertEquals("<resources>\n"
+            + "<!--Comment-->\n"
+            + "  <string name=\"Hello\">This is hello</string>\n"
+            + "  <string name=\"go\">Go</string>\n"
+            + "<!--Another comment\n"
+            + " two comments-->\n"
+            + "  <string name=\"OK\">okay</string>\n"
+            + "  <string name=\"keyOnly\"></string>\n"
+            + "</resources>\n", xml);
    }
 }

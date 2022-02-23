@@ -5,8 +5,10 @@ import java.awt.FlowLayout;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.IntUnaryOperator;
 
@@ -17,6 +19,8 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+
+import com.user00.javastringexternalize.Converters.Translation;
 
 import static com.user00.javastringexternalize.JavaStringExternalize.GUI_GAP;
 
@@ -67,14 +71,22 @@ public class JavaStringExternalizeFrame extends JFrame
       
       JMenu convertersMenu = new JMenu("Converters");
       JMenuItem propToStringsXmlMenuItem = new JMenuItem("Properties to Strings.xml...");
-      propToStringsXmlMenuItem.addActionListener((e) -> {
+      propToStringsXmlMenuItem.addActionListener((evt) -> {
          ConvertersDialog dialog = new ConvertersDialog(frame, "Properties to Strings.xml", true);
          dialog.setLocationRelativeTo(frame);
          dialog.setVisible(true);
          if (dialog.applyClicked)
          {
-            
-            System.err.println("Apply clicked");
+            try {
+               String in = Files.readString(Path.of(dialog.sourceName), StandardCharsets.UTF_8);
+               List<Translation> translation = Converters.readPropertiesFile(in);
+               String out = Converters.translationsToStringsXml(translation);
+               Files.writeString(Path.of(dialog.destName), "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + out, StandardCharsets.UTF_8);
+            } 
+            catch (IOException e) 
+            {
+               e.printStackTrace();
+            }
          }
       });
       convertersMenu.add(propToStringsXmlMenuItem);
