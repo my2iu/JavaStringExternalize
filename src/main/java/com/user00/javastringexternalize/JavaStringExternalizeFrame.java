@@ -91,6 +91,24 @@ public class JavaStringExternalizeFrame extends JFrame
       });
       convertersMenu.add(propToStringsXmlMenuItem);
       JMenuItem xliffToStringsXmlMenuItem = new JMenuItem("Xliff to Strings.xml...");
+      xliffToStringsXmlMenuItem.addActionListener((evt) -> {
+         ConvertersDialog dialog = new ConvertersDialog(frame, "Xliff1.2 to Strings.xml", true);
+         dialog.setLocationRelativeTo(frame);
+         dialog.setVisible(true);
+         if (dialog.applyClicked)
+         {
+            try {
+               String in = Files.readString(Path.of(dialog.sourceName), StandardCharsets.UTF_8);
+               List<Translation> translation = Converters.readXliff12File(in);
+               String out = Converters.translationsToStringsXml(translation);
+               Files.writeString(Path.of(dialog.destName), "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + out, StandardCharsets.UTF_8);
+            } 
+            catch (IOException e) 
+            {
+               e.printStackTrace();
+            }
+         }
+      });
       convertersMenu.add(xliffToStringsXmlMenuItem);
       menuBar.add(convertersMenu);
       
