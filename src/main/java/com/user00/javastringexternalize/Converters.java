@@ -1,6 +1,5 @@
 package com.user00.javastringexternalize;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -17,6 +16,7 @@ import javax.xml.xpath.XPathFactory;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.Token;
+import org.apache.commons.text.StringEscapeUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -159,7 +159,7 @@ public class Converters {
          {
             toReturn += "<!--" + trans.note + "-->\n";
          }
-         toReturn += String.format("  <string name=\"%s\">%s</string>\n", trans.key, trans.text);
+         toReturn += String.format("  <string name=\"%s\">%s</string>\n", trans.key, StringEscapeUtils.escapeXml10(trans.text));
       }
       toReturn += "</resources>\n";
       return toReturn;
