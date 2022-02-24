@@ -113,6 +113,35 @@ public class ConvertersTest
                   ),
             translations);
    }
+
+   @Test
+   public void testMergeTranslationsIntoProperties()
+   {
+      List<Converters.Translation> translations = Arrays.asList(
+            new Converters.Translation("hi", "Annuler", ""),
+            new Converters.Translation("Exit", "Sortir", "Menu option\n Additional Comment  "),
+            new Converters.Translation("dMs-cI-mzQ.title", "Fichier", "")
+            );
+      String merged = Converters.mergeTranslationsIntoProperties(translations, 
+            "#Comment\n"
+            + ""
+            + "hi = This is hello \n"
+            + "\n"
+            + "go = Go\n"
+            + "#Another comment\n"
+            + "# two comments\n"
+            + " OK = okay\n"
+            + "Exit=");
+      assertEquals("#Comment\n"
+            + ""
+            + "hi = Annuler\n"
+            + "\n"
+            + "go = Go\n"
+            + "#Another comment\n"
+            + "# two comments\n"
+            + " OK = okay\n"
+            + "Exit = Sortir", merged);
+   }
    
    @Test
    public void testMergeTranslationsIntoXliff()
@@ -177,6 +206,5 @@ public class ConvertersTest
             + "        <note>a comment.</note>\n"
             + "      </trans-unit>\n"
             + "</body></file></xliff>", merged);
-      
    }
 }

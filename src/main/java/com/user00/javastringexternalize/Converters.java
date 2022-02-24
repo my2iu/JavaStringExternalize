@@ -229,6 +229,42 @@ public class Converters {
       toReturn += "</resources>\n";
       return toReturn;
    }
+
+   public static String mergeTranslationsIntoProperties(List<Translation> translations, String propsFile)
+   {
+      Map<String, Translation> transMap = createTranslationMap(translations);
+      String toReturn = "";
+      PropertiesLexer lexer = new PropertiesLexer(CharStreams.fromString(propsFile));
+      String key = "";
+      boolean skipToCrlf = false;
+      for (Token tok: lexer.getAllTokens())
+      {
+         if (skipToCrlf && tok.getType() != PropertiesLexer.CRLF)
+            continue;
+         switch (tok.getType())
+         {
+         case PropertiesLexer.KEY:
+         {
+            key = tok.getText();
+            toReturn += key;
+            Translation trans = transMap.get(key);
+            if (trans != null)
+            {
+               toReturn += " = " + trans.text;
+               skipToCrlf = true;
+            }
+            break;
+         }
+         case PropertiesLexer.CRLF:
+            skipToCrlf = false;
+            // Fall through
+         default:
+            toReturn += tok.getText();
+            break;
+         }
+      }
+      return toReturn;
+   }
    
    public static String mergeTranslationsIntoXliff(List<Translation> translations, String xliffFile)
    {
