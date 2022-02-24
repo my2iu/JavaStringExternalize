@@ -110,6 +110,48 @@ public class JavaStringExternalizeFrame extends JFrame
          }
       });
       convertersMenu.add(xliffToStringsXmlMenuItem);
+      JMenuItem mergeStringXmlToPropsMenuItem = new JMenuItem("Merge Strings.xml into Properties...");
+      mergeStringXmlToPropsMenuItem.addActionListener((evt) -> {
+         ConvertersDialog dialog = new ConvertersDialog(frame, "Merge Strings.xml into Properties...", true);
+         dialog.setLocationRelativeTo(frame);
+         dialog.setVisible(true);
+         if (dialog.applyClicked)
+         {
+            try {
+               String in = Files.readString(Path.of(dialog.sourceName), StandardCharsets.UTF_8);
+               List<Translation> translation = Converters.readStringsXmlFile(in);
+               String dest = Files.readString(Path.of(dialog.destName), StandardCharsets.UTF_8);
+               String out = Converters.mergeTranslationsIntoProperties(translation, dest);
+               Files.writeString(Path.of(dialog.destName), out, StandardCharsets.UTF_8);
+            } 
+            catch (IOException e) 
+            {
+               e.printStackTrace();
+            }
+         }
+      });
+      convertersMenu.add(mergeStringXmlToPropsMenuItem);
+      JMenuItem mergeStringXmlToXliffMenuItem = new JMenuItem("Merge Strings.xml into Xliff...");
+      mergeStringXmlToXliffMenuItem.addActionListener((evt) -> {
+         ConvertersDialog dialog = new ConvertersDialog(frame, "Merge Strings.xml into Xliff...", true);
+         dialog.setLocationRelativeTo(frame);
+         dialog.setVisible(true);
+         if (dialog.applyClicked)
+         {
+            try {
+               String in = Files.readString(Path.of(dialog.sourceName), StandardCharsets.UTF_8);
+               List<Translation> translation = Converters.readStringsXmlFile(in);
+               String dest = Files.readString(Path.of(dialog.destName), StandardCharsets.UTF_8);
+               String out = Converters.mergeTranslationsIntoXliff(translation, dest);
+               Files.writeString(Path.of(dialog.destName), out, StandardCharsets.UTF_8);
+            } 
+            catch (IOException e) 
+            {
+               e.printStackTrace();
+            }
+         }
+      });
+      convertersMenu.add(mergeStringXmlToXliffMenuItem);
       menuBar.add(convertersMenu);
       
       StringTrackerPanel trackerPanel = new StringTrackerPanel(tracker);
