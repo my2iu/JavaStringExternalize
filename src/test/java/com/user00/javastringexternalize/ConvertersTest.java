@@ -91,4 +91,26 @@ public class ConvertersTest
                   ),
             translations);
    }
+   
+   @Test
+   public void testReadStringsXml()
+   {
+      List<Converters.Translation> translations = Converters.readStringsXmlFile(
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?><resources>\n"
+            + "  <string name=\"Cancel\">Annuler</string>\n"
+            + "  \n"
+            + "  <!--Menu option-->\n"
+            + "<!-- Additional Comment  -->\n"
+            + "  <string name=\"Exit\">Sortir</string>\n"
+            + "  <string name=\"dMs-cI-mzQ.title\">Fichier</string>\n"
+            + "</resources>"
+      );
+      assertIterableEquals(
+            Arrays.asList(
+                  new Converters.Translation("Cancel", "Annuler", ""),
+                  new Converters.Translation("Exit", "Sortir", "Menu option\n Additional Comment  "),
+                  new Converters.Translation("dMs-cI-mzQ.title", "Fichier", "")
+                  ),
+            translations);
+   }
 }

@@ -19,6 +19,7 @@ import org.antlr.v4.runtime.Token;
 import org.apache.commons.text.StringEscapeUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -146,6 +147,55 @@ public class Converters {
       {
          e.printStackTrace();
       }
+      return translations;
+   }
+   
+   public static List<Translation> readStringsXmlFile(String xmlFile)
+   {
+      List<Translation> translations = new ArrayList<>();
+      
+      // Read the XML
+      Document doc = null;
+      try {
+         DocumentBuilderFactory dbf = DocumentBuilderFactory.newDefaultInstance();
+         DocumentBuilder db = dbf.newDocumentBuilder();
+         doc = db.parse(new InputSource(new StringReader(xmlFile)));
+         
+      } catch (ParserConfigurationException | SAXException | IOException e)
+      {
+         e.printStackTrace();
+      }
+      if (doc == null) return translations;
+      
+      // Convert each <string> to a translation
+      String comments = "";
+      if ("resouces".equals(doc.getDocumentElement().getNodeName()))
+      {
+         System.err.println("Strings.xml file does not have a <resources> element as the document element");
+         return translations;
+      }
+      NodeList nodes = doc.getDocumentElement().getChildNodes();
+      for (int n = 0; n < nodes.getLength(); n++)
+      {
+         Node node = nodes.item(n);
+         if (node.getNodeType() == Node.COMMENT_NODE)
+         {
+            if (!comments.isEmpty())
+            comments += "\n";
+            comments += node.getNodeValue();
+         }
+         else if (node.getNodeType() == Node.ELEMENT_NODE)
+         {
+            Element el = (Element)node;
+            if ("string".equals(node.getNodeName()))
+            {
+               translations.add(new Translation(el.getAttribute("name"), 
+                     el.getTextContent(), comments));
+            }
+            comments = "";
+         }
+      }
+
       return translations;
    }
    
