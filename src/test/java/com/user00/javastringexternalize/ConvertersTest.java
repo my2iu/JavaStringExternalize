@@ -113,4 +113,70 @@ public class ConvertersTest
                   ),
             translations);
    }
+   
+   @Test
+   public void testMergeTranslationsIntoXliff()
+   {
+      List<Converters.Translation> translations = Arrays.asList(
+            new Converters.Translation("hi", "Annuler", ""),
+            new Converters.Translation("Exit", "Sortir", "Menu option\n Additional Comment  "),
+            new Converters.Translation("dMs-cI-mzQ.title", "Fichier", "")
+            );
+      String merged = Converters.mergeTranslationsIntoXliff(translations,
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            + "<xliff xmlns=\"urn:oasis:names:tc:xliff:document:1.2\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" version=\"1.2\" xsi:schemaLocation=\"urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd\">\n"
+            + "  <file original=\"Omber/Base.lproj/AskForRating.storyboard\" source-language=\"en\" target-language=\"fr\" datatype=\"plaintext\">\n"
+            + "    <header>\n"
+            + "      <tool tool-id=\"com.apple.dt.xcode\" tool-name=\"Xcode\" tool-version=\"13.2.1\" build-num=\"13C100\"/>\n"
+            + "    </header>\n"
+            + "    <body>\n"
+            + "      <trans-unit id=\"Djc-sA-1YT.title\" xml:space=\"preserve\">\n"
+            + "        <source>Jello</source>\n"
+            + "        <target>Jello2</target>\n"
+            + "        <note>Class = \"NSButtonCell\"; title = \"Jello\"; ObjectID = \"Djc-sA-1YT\";</note>\n"
+            + "      </trans-unit>"
+            + "</body></file>"
+            + " <file original=\"Omber/en.lproj/Localizable.strings\" datatype=\"plaintext\" source-language=\"en\" target-language=\"fr\">\n"
+            + "    <header>\n"
+            + "      <tool tool-id=\"com.apple.dt.xcode\" tool-name=\"Xcode\" tool-version=\"13.2.1\" build-num=\"13C100\"/>\n"
+            + "    </header>\n"
+            + "    <body>\n"
+            + "      <trans-unit id=\"hi\" xml:space=\"preserve\">\n"
+            + "        <source>hello</source>\n"
+            + "        <note>No comment provided by engineer.</note>\n"
+            + "      </trans-unit>\n"
+            + "      <trans-unit id=\"hi2\" xml:space=\"preserve\">\n"
+            + "        <source>hello2</source>\n"
+            + "        <note>a comment.</note>\n"
+            + "      </trans-unit>\n"
+            + "</body></file></xliff>");
+      assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
+            + "<xliff xmlns=\"urn:oasis:names:tc:xliff:document:1.2\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" version=\"1.2\" xsi:schemaLocation=\"urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd\">\n"
+            + "  <file datatype=\"plaintext\" original=\"Omber/Base.lproj/AskForRating.storyboard\" source-language=\"en\" target-language=\"fr\">\n"
+            + "    <header>\n"
+            + "      <tool build-num=\"13C100\" tool-id=\"com.apple.dt.xcode\" tool-name=\"Xcode\" tool-version=\"13.2.1\"/>\n"
+            + "    </header>\n"
+            + "    <body>\n"
+            + "      <trans-unit id=\"Djc-sA-1YT.title\" xml:space=\"preserve\">\n"
+            + "        <source>Jello</source>\n"
+            + "        <target>Jello2</target>\n"
+            + "        <note>Class = \"NSButtonCell\"; title = \"Jello\"; ObjectID = \"Djc-sA-1YT\";</note>\n"
+            + "      </trans-unit>"
+            + "</body></file>"
+            + " <file datatype=\"plaintext\" original=\"Omber/en.lproj/Localizable.strings\" source-language=\"en\" target-language=\"fr\">\n"
+            + "    <header>\n"
+            + "      <tool build-num=\"13C100\" tool-id=\"com.apple.dt.xcode\" tool-name=\"Xcode\" tool-version=\"13.2.1\"/>\n"
+            + "    </header>\n"
+            + "    <body>\n"
+            + "      <trans-unit id=\"hi\" xml:space=\"preserve\">\n"
+            + "        <source>hello</source>\n"
+            + "        <note>No comment provided by engineer.</note>\n"
+            + "      <target>Annuler</target></trans-unit>\n"
+            + "      <trans-unit id=\"hi2\" xml:space=\"preserve\">\n"
+            + "        <source>hello2</source>\n"
+            + "        <note>a comment.</note>\n"
+            + "      </trans-unit>\n"
+            + "</body></file></xliff>", merged);
+      
+   }
 }

@@ -2,13 +2,22 @@ package com.user00.javastringexternalize;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -103,16 +112,7 @@ public class Converters {
       List<Translation> translations = new ArrayList<>();
       
       // Read the XML
-      Document doc = null;
-      try {
-         DocumentBuilderFactory dbf = DocumentBuilderFactory.newDefaultInstance();
-         DocumentBuilder db = dbf.newDocumentBuilder();
-         doc = db.parse(new InputSource(new StringReader(xliffFile)));
-         
-      } catch (ParserConfigurationException | SAXException | IOException e)
-      {
-         e.printStackTrace();
-      }
+      Document doc = parseXmlDomFromString(xliffFile);
       if (doc == null) return translations;
       
       // Convert things to translations
@@ -155,16 +155,7 @@ public class Converters {
       List<Translation> translations = new ArrayList<>();
       
       // Read the XML
-      Document doc = null;
-      try {
-         DocumentBuilderFactory dbf = DocumentBuilderFactory.newDefaultInstance();
-         DocumentBuilder db = dbf.newDocumentBuilder();
-         doc = db.parse(new InputSource(new StringReader(xmlFile)));
-         
-      } catch (ParserConfigurationException | SAXException | IOException e)
-      {
-         e.printStackTrace();
-      }
+      Document doc = parseXmlDomFromString(xmlFile);
       if (doc == null) return translations;
       
       // Convert each <string> to a translation
@@ -199,6 +190,30 @@ public class Converters {
       return translations;
    }
    
+   private static Document parseXmlDomFromString(String xml)
+   {
+      try {
+         DocumentBuilderFactory dbf = DocumentBuilderFactory.newDefaultInstance();
+         DocumentBuilder db = dbf.newDocumentBuilder();
+         return db.parse(new InputSource(new StringReader(xml)));
+         
+      } catch (ParserConfigurationException | SAXException | IOException e)
+      {
+         e.printStackTrace();
+         return null;
+      }
+   }
+   
+   /**
+    * From a list of translations, create a map of translation keys to translations
+    */
+   private static Map<String, Translation> createTranslationMap(List<Translation> translations)
+   {
+      Map<String, Translation> translationMap = new HashMap<>();
+      translations.forEach(trans -> translationMap.put(trans.key, trans));
+      return translationMap;
+   }
+   
    public static String translationsToStringsXml(List<Translation> translations)
    {
       String toReturn = "";
@@ -213,5 +228,69 @@ public class Converters {
       }
       toReturn += "</resources>\n";
       return toReturn;
+   }
+   
+   public static String mergeTranslationsIntoXliff(List<Translation> translations, String xliffFile)
+   {
+      Map<String, Translation> transMap = createTranslationMap(translations);
+      
+      // Read the XML
+      Document doc = parseXmlDomFromString(xliffFile);
+      if (doc == null) return null;
+      
+      // Walk through every translation unit in the xliff file
+      XPathFactory xpathFactory = XPathFactory.newInstance();
+      XPath xpath = xpathFactory.newXPath();
+      try
+      {
+         NodeList transUnits = (NodeList)xpath.evaluate("/xliff/file/body/trans-unit", doc, XPathConstants.NODESET);
+         for (int transIdx = 0; transIdx < transUnits.getLength(); transIdx++)
+         {
+            // Check if we have a translation available for the string
+            Element transEl = (Element)transUnits.item(transIdx);
+            String id = transEl.getAttribute("id");
+            Translation trans = transMap.get(id);
+            if (trans != null)
+            {
+               // Substitute in a new <target> tag with the translation
+               // (assume that there is only a single <target> even though multiple are allowed)
+               NodeList targetTags = transEl.getElementsByTagName("target");
+               Element targetEl;
+               if (targetTags.getLength() < 1)
+               {
+                  targetEl = doc.createElement("target");
+                  transEl.appendChild(targetEl);
+               }
+               else if (targetTags.getLength() > 1)
+               {
+                  System.err.println("More than one translation <target> found in xliff file");
+                  targetEl = (Element)targetTags.item(0);
+               }
+               else
+                  targetEl = (Element)targetTags.item(0);
+               targetEl.setTextContent(trans.text);
+            }
+         }
+      } 
+      catch (XPathExpressionException e)
+      {
+         e.printStackTrace();
+      }
+      
+      // Write out the changed xliff file
+      try {
+         Transformer transformer = TransformerFactory.newDefaultInstance().newTransformer();
+         StringWriter writer = new StringWriter();
+         transformer.transform(new DOMSource(doc), new StreamResult(writer));
+         return writer.toString();
+      } 
+      catch (TransformerConfigurationException e)
+      {
+         e.printStackTrace();
+      } catch (TransformerException e)
+      {
+         e.printStackTrace();
+      }
+      return null;
    }
 }
