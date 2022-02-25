@@ -27,7 +27,7 @@ public class ConvertersDialog extends JDialog
    public String sourceName;
    public String destName;
    boolean applyClicked = false;
-   public ConvertersDialog(Frame owner, String title, boolean modal)
+   public ConvertersDialog(Frame owner, String title, boolean modal, String sourceExtension, String targetExtension)
    {
       super(owner, title, modal);
       setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -37,11 +37,11 @@ public class ConvertersDialog extends JDialog
       contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
       
       add(ConfigurationFilesChooserPanel.createFileLine(
-            "Source", "", (newName) -> {
+            "Source", "", true, sourceExtension, (newName) -> {
          sourceName = newName;
       }));
       add(ConfigurationFilesChooserPanel.createFileLine(
-            "Destination", "", false, (newName) -> {
+            "Destination", "", false, targetExtension, (newName) -> {
          destName = newName;
       }));
       

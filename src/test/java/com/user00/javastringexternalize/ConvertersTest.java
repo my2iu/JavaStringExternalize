@@ -53,6 +53,26 @@ public class ConvertersTest
    }
    
    @Test
+   public void testTranslationsToProperties()
+   {
+      String props = Converters.translationsToProperties(
+            Arrays.asList(
+                  new Converters.Translation("Hello", "This is hello", "Comment"),
+                  new Converters.Translation("go", "Go", ""),
+                  new Converters.Translation("OK", "okay", "Another comment\n two comments"),
+                  new Converters.Translation("keyOnly", "", "")
+                  ));
+      assertEquals(
+            "#Comment\n"
+            + "Hello = This is hello\n"
+            + "go = Go\n"
+            + "#Another comment\n"
+            + "# two comments\n"
+            + "OK = okay\n"
+            + "keyOnly = \n", props);
+      }
+   
+   @Test
    public void testReadXliff12File()
    {
       List<Converters.Translation> translations = Converters.readXliff12File(
@@ -179,6 +199,7 @@ public class ConvertersTest
             + "        <note>a comment.</note>\n"
             + "      </trans-unit>\n"
             + "</body></file></xliff>");
+      merged = merged.replaceAll("\r\n", "\n");
       assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
             + "<xliff xmlns=\"urn:oasis:names:tc:xliff:document:1.2\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" version=\"1.2\" xsi:schemaLocation=\"urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd\">\n"
             + "  <file datatype=\"plaintext\" original=\"Omber/Base.lproj/AskForRating.storyboard\" source-language=\"en\" target-language=\"fr\">\n"

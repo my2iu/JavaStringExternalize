@@ -14,6 +14,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class ConfigurationFilesChooserPanel extends JPanel
 {
@@ -67,10 +69,10 @@ public class ConfigurationFilesChooserPanel extends JPanel
 
    static JPanel createFileLine(String label, String value, Consumer<String> onChange)
    {
-      return createFileLine(label, value, true, onChange);
+      return createFileLine(label, value, true, null, onChange);
    }
 
-   static JPanel createFileLine(String label, String value, boolean isOpenFile, Consumer<String> onChange)
+   static JPanel createFileLine(String label, String value, boolean isOpenFile, String extension, Consumer<String> onChange)
    {
       JPanel line = new JPanel();
       line.setLayout(new BorderLayout(JavaStringExternalize.GUI_GAP, 0));
@@ -87,6 +89,12 @@ public class ConfigurationFilesChooserPanel extends JPanel
       line.add(fileButton, BorderLayout.LINE_END);
       fileButton.addActionListener((evt) -> {
          JFileChooser fc = new JFileChooser(fileTextField.getText());
+         if (extension != null)
+         {
+            FileFilter filter = new FileNameExtensionFilter("*." + extension, extension);
+            fc.addChoosableFileFilter(filter);
+            fc.setFileFilter(filter);
+         }
          int result;
          if (isOpenFile)
             result = fc.showOpenDialog(fileButton);

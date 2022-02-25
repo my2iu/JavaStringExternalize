@@ -72,7 +72,7 @@ public class JavaStringExternalizeFrame extends JFrame
       JMenu convertersMenu = new JMenu("Converters");
       JMenuItem propToStringsXmlMenuItem = new JMenuItem("Properties to Strings.xml...");
       propToStringsXmlMenuItem.addActionListener((evt) -> {
-         ConvertersDialog dialog = new ConvertersDialog(frame, "Properties to Strings.xml", true);
+         ConvertersDialog dialog = new ConvertersDialog(frame, "Properties to Strings.xml", true, "properties", "xml");
          dialog.setLocationRelativeTo(frame);
          dialog.setVisible(true);
          if (dialog.applyClicked)
@@ -92,7 +92,7 @@ public class JavaStringExternalizeFrame extends JFrame
       convertersMenu.add(propToStringsXmlMenuItem);
       JMenuItem xliffToStringsXmlMenuItem = new JMenuItem("Xliff to Strings.xml...");
       xliffToStringsXmlMenuItem.addActionListener((evt) -> {
-         ConvertersDialog dialog = new ConvertersDialog(frame, "Xliff1.2 to Strings.xml", true);
+         ConvertersDialog dialog = new ConvertersDialog(frame, "Xliff1.2 to Strings.xml", true, "xliff", "xml");
          dialog.setLocationRelativeTo(frame);
          dialog.setVisible(true);
          if (dialog.applyClicked)
@@ -110,9 +110,29 @@ public class JavaStringExternalizeFrame extends JFrame
          }
       });
       convertersMenu.add(xliffToStringsXmlMenuItem);
+      JMenuItem stringsXmlToPropsMenuItem = new JMenuItem("Strings.xml to Properties...");
+      stringsXmlToPropsMenuItem.addActionListener((evt) -> {
+         ConvertersDialog dialog = new ConvertersDialog(frame, "Strings.xml to Properties", true, "xml", "properties");
+         dialog.setLocationRelativeTo(frame);
+         dialog.setVisible(true);
+         if (dialog.applyClicked)
+         {
+            try {
+               String in = Files.readString(Path.of(dialog.sourceName), StandardCharsets.UTF_8);
+               List<Translation> translation = Converters.readStringsXmlFile(in);
+               String out = Converters.translationsToProperties(translation);
+               Files.writeString(Path.of(dialog.destName), out, StandardCharsets.UTF_8);
+            } 
+            catch (IOException e) 
+            {
+               e.printStackTrace();
+            }
+         }
+      });
+      convertersMenu.add(stringsXmlToPropsMenuItem);
       JMenuItem mergeStringXmlToPropsMenuItem = new JMenuItem("Merge Strings.xml into Properties...");
       mergeStringXmlToPropsMenuItem.addActionListener((evt) -> {
-         ConvertersDialog dialog = new ConvertersDialog(frame, "Merge Strings.xml into Properties...", true);
+         ConvertersDialog dialog = new ConvertersDialog(frame, "Merge Strings.xml into Properties...", true, "xml", "properties");
          dialog.setLocationRelativeTo(frame);
          dialog.setVisible(true);
          if (dialog.applyClicked)
@@ -133,7 +153,7 @@ public class JavaStringExternalizeFrame extends JFrame
       convertersMenu.add(mergeStringXmlToPropsMenuItem);
       JMenuItem mergeStringXmlToXliffMenuItem = new JMenuItem("Merge Strings.xml into Xliff...");
       mergeStringXmlToXliffMenuItem.addActionListener((evt) -> {
-         ConvertersDialog dialog = new ConvertersDialog(frame, "Merge Strings.xml into Xliff...", true);
+         ConvertersDialog dialog = new ConvertersDialog(frame, "Merge Strings.xml into Xliff...", true, "xml", "xliff");
          dialog.setLocationRelativeTo(frame);
          dialog.setVisible(true);
          if (dialog.applyClicked)

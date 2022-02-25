@@ -230,6 +230,22 @@ public class Converters {
       return toReturn;
    }
 
+   public static String translationsToProperties(List<Translation> translations)
+   {
+      String toReturn = "";
+      for (Translation trans: translations)
+      {
+         if (!trans.note.isEmpty())
+         {
+            String [] noteLines = trans.note.split("\\R");
+            for (String line: noteLines)
+               toReturn += "#" + line + "\n";
+         }
+         toReturn += String.format("%s = %s\n", trans.key, trans.text);
+      }
+      return toReturn;
+   }
+
    public static String mergeTranslationsIntoProperties(List<Translation> translations, String propsFile)
    {
       Map<String, Translation> transMap = createTranslationMap(translations);
