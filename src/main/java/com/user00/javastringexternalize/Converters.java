@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -207,7 +208,7 @@ public class Converters {
    /**
     * From a list of translations, create a map of translation keys to translations
     */
-   private static Map<String, Translation> createTranslationMap(List<Translation> translations)
+   private static Map<String, Translation> createTranslationMap(Collection<Translation> translations)
    {
       Map<String, Translation> translationMap = new HashMap<>();
       translations.forEach(trans -> translationMap.put(trans.key, trans));
@@ -246,7 +247,7 @@ public class Converters {
       return toReturn;
    }
 
-   public static String mergeTranslationsIntoProperties(List<Translation> translations, String propsFile)
+   public static String mergeTranslationsIntoProperties(Collection<Translation> translations, String propsFile, boolean outputEvenIfUntranslated)
    {
       Map<String, Translation> transMap = createTranslationMap(translations);
       String toReturn = "";
@@ -262,11 +263,18 @@ public class Converters {
          case PropertiesLexer.KEY:
          {
             key = tok.getText();
-            toReturn += key;
             Translation trans = transMap.get(key);
             if (trans != null)
             {
-               toReturn += " = " + trans.text;
+               toReturn += key + " = " + trans.text;
+               skipToCrlf = true;
+            }
+            else if (outputEvenIfUntranslated)
+            {
+               toReturn += key;
+            }
+            else 
+            {
                skipToCrlf = true;
             }
             break;

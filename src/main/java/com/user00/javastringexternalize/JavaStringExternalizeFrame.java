@@ -8,7 +8,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.IntUnaryOperator;
 
@@ -72,16 +74,16 @@ public class JavaStringExternalizeFrame extends JFrame
       JMenu convertersMenu = new JMenu("Converters");
       JMenuItem propToStringsXmlMenuItem = new JMenuItem("Properties to Strings.xml...");
       propToStringsXmlMenuItem.addActionListener((evt) -> {
-         ConvertersDialog dialog = new ConvertersDialog(frame, "Properties to Strings.xml", true, "properties", "xml");
+         ConvertersDialog dialog = ConvertersDialog.forSourceDest(frame, "Properties to Strings.xml", true, "properties", "xml");
          dialog.setLocationRelativeTo(frame);
          dialog.setVisible(true);
          if (dialog.applyClicked)
          {
             try {
-               String in = Files.readString(Path.of(dialog.sourceName), StandardCharsets.UTF_8);
+               String in = Files.readString(Path.of(dialog.getSourceName()), StandardCharsets.UTF_8);
                List<Translation> translation = Converters.readPropertiesFile(in);
                String out = Converters.translationsToStringsXml(translation);
-               Files.writeString(Path.of(dialog.destName), "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + out, StandardCharsets.UTF_8);
+               Files.writeString(Path.of(dialog.getDestName()), "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + out, StandardCharsets.UTF_8);
             } 
             catch (IOException e) 
             {
@@ -92,16 +94,16 @@ public class JavaStringExternalizeFrame extends JFrame
       convertersMenu.add(propToStringsXmlMenuItem);
       JMenuItem xliffToStringsXmlMenuItem = new JMenuItem("Xliff to Strings.xml...");
       xliffToStringsXmlMenuItem.addActionListener((evt) -> {
-         ConvertersDialog dialog = new ConvertersDialog(frame, "Xliff1.2 to Strings.xml", true, "xliff", "xml");
+         ConvertersDialog dialog = ConvertersDialog.forSourceDest(frame, "Xliff1.2 to Strings.xml", true, "xliff", "xml");
          dialog.setLocationRelativeTo(frame);
          dialog.setVisible(true);
          if (dialog.applyClicked)
          {
             try {
-               String in = Files.readString(Path.of(dialog.sourceName), StandardCharsets.UTF_8);
+               String in = Files.readString(Path.of(dialog.getSourceName()), StandardCharsets.UTF_8);
                List<Translation> translation = Converters.readXliff12File(in);
                String out = Converters.translationsToStringsXml(translation);
-               Files.writeString(Path.of(dialog.destName), "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + out, StandardCharsets.UTF_8);
+               Files.writeString(Path.of(dialog.getDestName()), "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + out, StandardCharsets.UTF_8);
             } 
             catch (IOException e) 
             {
@@ -112,16 +114,16 @@ public class JavaStringExternalizeFrame extends JFrame
       convertersMenu.add(xliffToStringsXmlMenuItem);
       JMenuItem stringsXmlToPropsMenuItem = new JMenuItem("Strings.xml to Properties...");
       stringsXmlToPropsMenuItem.addActionListener((evt) -> {
-         ConvertersDialog dialog = new ConvertersDialog(frame, "Strings.xml to Properties", true, "xml", "properties");
+         ConvertersDialog dialog = ConvertersDialog.forSourceDest(frame, "Strings.xml to Properties", true, "xml", "properties");
          dialog.setLocationRelativeTo(frame);
          dialog.setVisible(true);
          if (dialog.applyClicked)
          {
             try {
-               String in = Files.readString(Path.of(dialog.sourceName), StandardCharsets.UTF_8);
+               String in = Files.readString(Path.of(dialog.getSourceName()), StandardCharsets.UTF_8);
                List<Translation> translation = Converters.readStringsXmlFile(in);
                String out = Converters.translationsToProperties(translation);
-               Files.writeString(Path.of(dialog.destName), out, StandardCharsets.UTF_8);
+               Files.writeString(Path.of(dialog.getDestName()), out, StandardCharsets.UTF_8);
             } 
             catch (IOException e) 
             {
@@ -132,17 +134,17 @@ public class JavaStringExternalizeFrame extends JFrame
       convertersMenu.add(stringsXmlToPropsMenuItem);
       JMenuItem mergeStringXmlToPropsMenuItem = new JMenuItem("Merge Strings.xml into Properties...");
       mergeStringXmlToPropsMenuItem.addActionListener((evt) -> {
-         ConvertersDialog dialog = new ConvertersDialog(frame, "Merge Strings.xml into Properties...", true, "xml", "properties");
+         ConvertersDialog dialog = ConvertersDialog.forSourceDest(frame, "Merge Strings.xml into Properties...", true, "xml", "properties");
          dialog.setLocationRelativeTo(frame);
          dialog.setVisible(true);
          if (dialog.applyClicked)
          {
             try {
-               String in = Files.readString(Path.of(dialog.sourceName), StandardCharsets.UTF_8);
+               String in = Files.readString(Path.of(dialog.getSourceName()), StandardCharsets.UTF_8);
                List<Translation> translation = Converters.readStringsXmlFile(in);
-               String dest = Files.readString(Path.of(dialog.destName), StandardCharsets.UTF_8);
-               String out = Converters.mergeTranslationsIntoProperties(translation, dest);
-               Files.writeString(Path.of(dialog.destName), out, StandardCharsets.UTF_8);
+               String dest = Files.readString(Path.of(dialog.getDestName()), StandardCharsets.UTF_8);
+               String out = Converters.mergeTranslationsIntoProperties(translation, dest, true);
+               Files.writeString(Path.of(dialog.getDestName()), out, StandardCharsets.UTF_8);
             } 
             catch (IOException e) 
             {
@@ -153,17 +155,17 @@ public class JavaStringExternalizeFrame extends JFrame
       convertersMenu.add(mergeStringXmlToPropsMenuItem);
       JMenuItem mergeStringXmlToXliffMenuItem = new JMenuItem("Merge Strings.xml into Xliff...");
       mergeStringXmlToXliffMenuItem.addActionListener((evt) -> {
-         ConvertersDialog dialog = new ConvertersDialog(frame, "Merge Strings.xml into Xliff...", true, "xml", "xliff");
+         ConvertersDialog dialog = ConvertersDialog.forSourceDest(frame, "Merge Strings.xml into Xliff...", true, "xml", "xliff");
          dialog.setLocationRelativeTo(frame);
          dialog.setVisible(true);
          if (dialog.applyClicked)
          {
             try {
-               String in = Files.readString(Path.of(dialog.sourceName), StandardCharsets.UTF_8);
+               String in = Files.readString(Path.of(dialog.getSourceName()), StandardCharsets.UTF_8);
                List<Translation> translation = Converters.readStringsXmlFile(in);
-               String dest = Files.readString(Path.of(dialog.destName), StandardCharsets.UTF_8);
+               String dest = Files.readString(Path.of(dialog.getDestName()), StandardCharsets.UTF_8);
                String out = Converters.mergeTranslationsIntoXliff(translation, dest);
-               Files.writeString(Path.of(dialog.destName), out, StandardCharsets.UTF_8);
+               Files.writeString(Path.of(dialog.getDestName()), out, StandardCharsets.UTF_8);
             } 
             catch (IOException e) 
             {
@@ -172,6 +174,50 @@ public class JavaStringExternalizeFrame extends JFrame
          }
       });
       convertersMenu.add(mergeStringXmlToXliffMenuItem);
+      JMenuItem mergeMultipleToPropertiesMenuItem = new JMenuItem("Merge Multiple Files into Properties...");
+      mergeMultipleToPropertiesMenuItem.addActionListener((evt) -> {
+         // xliff files store both the original English and the translation,
+         // but properties files only contain the translation, so we to keep
+         // all the files separated to track which strings have been translated
+         // or not, hence this more complicated merge command
+         ConvertersDialog dialog = ConvertersDialog.forMultipleFiles(frame, "Merge Multiple Files into Properties...", true,
+               new String[] {"Base Properties", "Properties (most preferred)", "Strings.xml", "Properties", "Strings.xml", "Properties", "Strings.xml (least preferred)", "Target Properties"},
+               new String[] {"", "", "", "", "", "", "", ""},
+               new String[] {"properties", "properties", "xml", "properties", "xml", "properties", "xml", "properties"});
+         dialog.setLocationRelativeTo(frame);
+         dialog.setVisible(true);
+         if (dialog.applyClicked)
+         {
+            try {
+               // Load in translations in order of priority
+               Map<String, Translation> translations = new HashMap<>();
+               for (int n = dialog.getFileNames().length - 2; n >= 1; n--)
+               {
+                  String source = dialog.getFileNames()[n];
+                  if (source == null || source.isEmpty()) continue;
+                  String in = Files.readString(Path.of(source), StandardCharsets.UTF_8);
+                  List<Translation> trans;
+                  if ((n % 2) == 1)
+                     trans = Converters.readPropertiesFile(in);
+                  else
+                     trans = Converters.readStringsXmlFile(in);
+                  // Make sure we have no repeat translations
+                  for (Translation t: trans)
+                     translations.put(t.key, t);
+               }
+               // Load in original list of English words and merge in the translations
+               String base = Files.readString(Path.of(dialog.getFileNames()[0]), StandardCharsets.UTF_8);
+               String out = Converters.mergeTranslationsIntoProperties(translations.values(), base, false);
+               // Write out to the target file
+               Files.writeString(Path.of(dialog.getFileNames()[dialog.getFileNames().length - 1]), out, StandardCharsets.UTF_8);
+            } 
+            catch (IOException e) 
+            {
+               e.printStackTrace();
+            }
+         }
+      });
+      convertersMenu.add(mergeMultipleToPropertiesMenuItem);
       menuBar.add(convertersMenu);
       
       StringTrackerPanel trackerPanel = new StringTrackerPanel(tracker);

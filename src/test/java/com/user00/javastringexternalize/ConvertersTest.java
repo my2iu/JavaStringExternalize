@@ -151,7 +151,7 @@ public class ConvertersTest
             + "#Another comment\n"
             + "# two comments\n"
             + " OK = okay\n"
-            + "Exit=");
+            + "Exit=", true);
       assertEquals("#Comment\n"
             + ""
             + "hi = Annuler\n"
@@ -162,7 +162,36 @@ public class ConvertersTest
             + " OK = okay\n"
             + "Exit = Sortir", merged);
    }
-   
+
+   @Test
+   public void testMergeTranslationsIntoPropertiesNoUntranslated()
+   {
+      List<Converters.Translation> translations = Arrays.asList(
+            new Converters.Translation("hi", "Annuler", ""),
+            new Converters.Translation("Exit", "Sortir", "Menu option\n Additional Comment  "),
+            new Converters.Translation("dMs-cI-mzQ.title", "Fichier", "")
+            );
+      String merged = Converters.mergeTranslationsIntoProperties(translations, 
+            "#Comment\n"
+            + ""
+            + "hi = This is hello \n"
+            + "\n"
+            + "go = Go\n"
+            + "#Another comment\n"
+            + "# two comments\n"
+            + " OK = okay\n"
+            + "Exit=", false);
+      assertEquals("#Comment\n"
+            + ""
+            + "hi = Annuler\n"
+            + "\n"
+            + "\n"
+            + "#Another comment\n"
+            + "# two comments\n"
+            + " \n"
+            + "Exit = Sortir", merged);
+   }
+
    @Test
    public void testMergeTranslationsIntoXliff()
    {

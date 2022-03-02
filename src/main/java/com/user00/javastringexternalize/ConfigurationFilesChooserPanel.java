@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.io.IOException;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -69,10 +70,10 @@ public class ConfigurationFilesChooserPanel extends JPanel
 
    static JPanel createFileLine(String label, String value, Consumer<String> onChange)
    {
-      return createFileLine(label, value, true, null, onChange);
+      return createFileLine(label, value, true, null, onChange, null);
    }
 
-   static JPanel createFileLine(String label, String value, boolean isOpenFile, String extension, Consumer<String> onChange)
+   static JPanel createFileLine(String label, String value, boolean isOpenFile, String extension, Consumer<String> onChange, Supplier<String> getDefaultFileName)
    {
       JPanel line = new JPanel();
       line.setLayout(new BorderLayout(JavaStringExternalize.GUI_GAP, 0));
@@ -88,7 +89,10 @@ public class ConfigurationFilesChooserPanel extends JPanel
       JButton fileButton = new JButton("\uD83D\uDCC1"); 
       line.add(fileButton, BorderLayout.LINE_END);
       fileButton.addActionListener((evt) -> {
-         JFileChooser fc = new JFileChooser(fileTextField.getText());
+         String startingFile = fileTextField.getText(); 
+         if ((startingFile == null || startingFile.isEmpty()) && getDefaultFileName != null)
+            startingFile = getDefaultFileName.get(); 
+         JFileChooser fc = new JFileChooser(startingFile);
          if (extension != null)
          {
             FileFilter filter = new FileNameExtensionFilter("*." + extension, extension);
