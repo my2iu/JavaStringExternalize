@@ -5,6 +5,7 @@ import static com.user00.javastringexternalize.JavaStringExternalize.GUI_GAP;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Frame;
+import java.util.Arrays;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -22,7 +23,7 @@ public class ConvertersDialog extends JDialog
    String [] fileNames;
    boolean applyClicked = false;
    String lastFile = "";
-   private ConvertersDialog(Frame owner, String title, boolean modal, String [] fileLabels, String [] fileNames, String[] extensions)
+   private ConvertersDialog(Frame owner, String title, boolean modal, String [] fileLabels, String [] startingFileNames, String[] extensions)
    {
       super(owner, title, modal);
       setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -31,6 +32,7 @@ public class ConvertersDialog extends JDialog
       contentPane.setBorder(BorderFactory.createEmptyBorder(GUI_GAP, GUI_GAP, GUI_GAP, GUI_GAP));
       contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
       
+      this.fileNames = Arrays.copyOf(startingFileNames, startingFileNames.length);
       for (int n = 0; n < fileNames.length; n++)
       {
          final int idx = n;
