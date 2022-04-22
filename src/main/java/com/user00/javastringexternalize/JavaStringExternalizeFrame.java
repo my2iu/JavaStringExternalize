@@ -101,7 +101,7 @@ public class JavaStringExternalizeFrame extends JFrame
          {
             try {
                String in = Files.readString(Path.of(dialog.getSourceName()), StandardCharsets.UTF_8);
-               List<Translation> translation = Converters.readXliff12File(in);
+               List<Translation> translation = Converters.readXliff12File(in, true, true);
                String out = Converters.translationsToStringsXml(translation);
                Files.writeString(Path.of(dialog.getDestName()), "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + out, StandardCharsets.UTF_8);
             } 
@@ -112,6 +112,26 @@ public class JavaStringExternalizeFrame extends JFrame
          }
       });
       convertersMenu.add(xliffToStringsXmlMenuItem);
+      JMenuItem xliffToStringsXmlUntranslatedMenuItem = new JMenuItem("Xliff to Strings.xml (Untranslated Only)...");
+      xliffToStringsXmlUntranslatedMenuItem.addActionListener((evt) -> {
+         ConvertersDialog dialog = ConvertersDialog.forSourceDest(frame, "Xliff1.2 to Strings.xml (Untranslated Only)", true, "xliff", "xml");
+         dialog.setLocationRelativeTo(frame);
+         dialog.setVisible(true);
+         if (dialog.applyClicked)
+         {
+            try {
+               String in = Files.readString(Path.of(dialog.getSourceName()), StandardCharsets.UTF_8);
+               List<Translation> translation = Converters.readXliff12File(in, false, true);
+               String out = Converters.translationsToStringsXml(translation);
+               Files.writeString(Path.of(dialog.getDestName()), "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + out, StandardCharsets.UTF_8);
+            } 
+            catch (IOException e) 
+            {
+               e.printStackTrace();
+            }
+         }
+      });
+      convertersMenu.add(xliffToStringsXmlUntranslatedMenuItem);
       JMenuItem stringsXmlToPropsMenuItem = new JMenuItem("Strings.xml to Properties...");
       stringsXmlToPropsMenuItem.addActionListener((evt) -> {
          ConvertersDialog dialog = ConvertersDialog.forSourceDest(frame, "Strings.xml to Properties", true, "xml", "properties");

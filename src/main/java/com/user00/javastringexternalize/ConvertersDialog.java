@@ -37,7 +37,7 @@ public class ConvertersDialog extends JDialog
       {
          final int idx = n;
          add(ConfigurationFilesChooserPanel.createFileLine(
-               fileLabels[idx], "", true, extensions[idx], (newName) -> {
+               fileLabels[idx], "", n != fileNames.length - 1, extensions[idx], (newName) -> {
             fileNames[idx] = newName;
             lastFile = newName;
          }, () -> lastFile));

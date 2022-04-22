@@ -108,7 +108,7 @@ public class Converters {
    /**
     * Read xliff format used by Apple
     */
-   public static List<Translation> readXliff12File(String xliffFile)
+   public static List<Translation> readXliff12File(String xliffFile, boolean includeTranslated, boolean includeUntranslated)
    {
       List<Translation> translations = new ArrayList<>();
       
@@ -138,6 +138,10 @@ public class Converters {
                String key = transEl.getAttribute("id");
                String val = xpath.evaluate("source", transEl);
                String note = xpath.evaluate("note", transEl);
+               String target = xpath.evaluate("target", transEl);
+               boolean hasTranslation = target != null && !target.isEmpty() && !target.equals(val);
+               if (hasTranslation && !includeTranslated) continue;
+               if (!hasTranslation && !includeUntranslated) continue;
                // Comments from the UI are useless, so we will discard them
                if (!isStrings) note = "";
                if ("No comment provided by engineer.".equals(note)) note = "";

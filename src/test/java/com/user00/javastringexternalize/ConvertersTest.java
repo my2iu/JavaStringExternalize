@@ -102,7 +102,7 @@ public class ConvertersTest
             + "        <source>hello2</source>\n"
             + "        <note>a comment.</note>\n"
             + "      </trans-unit>\n"
-            + "</body></file></xliff>");
+            + "</body></file></xliff>", true, true);
       assertIterableEquals(
             Arrays.asList(
                   new Converters.Translation("Djc-sA-1YT.title", "Jello", ""),
