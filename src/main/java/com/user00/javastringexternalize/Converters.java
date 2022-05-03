@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -127,8 +129,11 @@ public class Converters {
             // Check if it's a strings file or a UI file
             Element fileEl = (Element)files.item(fileIdx);
             boolean isStrings = false;
+            boolean isStoryboard = false;
             if (fileEl.hasAttribute("original") && fileEl.getAttribute("original").endsWith(".strings"))
                isStrings = true;
+            if (fileEl.hasAttribute("original") && fileEl.getAttribute("original").endsWith(".storyboard"))
+               isStoryboard = true;
             
             // Traverse the translations
             NodeList transUnits = (NodeList)xpath.evaluate("body/trans-unit", fileEl, XPathConstants.NODESET);
@@ -143,7 +148,16 @@ public class Converters {
                if (hasTranslation && !includeTranslated) continue;
                if (!hasTranslation && !includeUntranslated) continue;
                // Comments from the UI are useless, so we will discard them
-               if (!isStrings) note = "";
+               if (isStoryboard)
+               {
+                  // It is possible for the programmers to insert translation notes in the storyboard UI, but it 
+                  // requires extra parsing
+                  Matcher m = Pattern.compile("Note = [\"](.*)[\"];").matcher(note);
+                  if (m != null && m.find())
+                     note = m.group(1);
+                  else
+                     note = "";
+               }
                if ("No comment provided by engineer.".equals(note)) note = "";
                translations.add(new Translation(key, val, note));
             }

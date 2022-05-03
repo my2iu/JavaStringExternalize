@@ -88,6 +88,11 @@ public class ConvertersTest
             + "        <target>Jello2</target>\n"
             + "        <note>Class = \"NSButtonCell\"; title = \"Jello\"; ObjectID = \"Djc-sA-1YT\";</note>\n"
             + "      </trans-unit>"
+            + "      <trans-unit id=\"Djc-sA-2YT.title\" xml:space=\"preserve\">\n"
+            + "        <source>GreenJello</source>\n"
+            + "        <target>GreenJello2</target>\n"
+            + "        <note>Class = \"NSButtonCell\"; title = \"Jello\"; ObjectID = \"Djc-sA-1YT\"; Note = \"This is a programmer note\";</note>\n"
+            + "      </trans-unit>"
             + "</body></file>"
             + " <file original=\"Omber/en.lproj/Localizable.strings\" datatype=\"plaintext\" source-language=\"en\" target-language=\"fr\">\n"
             + "    <header>\n"
@@ -106,6 +111,7 @@ public class ConvertersTest
       assertIterableEquals(
             Arrays.asList(
                   new Converters.Translation("Djc-sA-1YT.title", "Jello", ""),
+                  new Converters.Translation("Djc-sA-2YT.title", "GreenJello", "This is a programmer note"),
                   new Converters.Translation("hi", "hello", ""),
                   new Converters.Translation("hi2", "hello2", "a comment.")
                   ),
